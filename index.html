@@ -13,14 +13,13 @@
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,400..800&family=Atkinson+Hyperlegible:wght@400;700&display=swap">
 <style>
-/* Layout: one narrow column in a tailor's fitting room — stitched seam under the header, a measuring-tape timer, cream fabric-swatch puzzle cards and clothing-label tags for the fit tiers. */
+/* Layout: one narrow column on a quiet navy jigsaw ground. Cream jigsaw-piece cards hold each puzzle; a row of pieces is the clock; results drop a piece into a slot on a small board. */
 :root{
-  --navy:#0d1830; --navy-2:#15244a; --navy-3:#20335f; --line:rgba(245,238,220,.16);
-  --cream:#f5eedc; --cream-2:#e8dec4; --paper:#fffaf0; --ink:#13203d; --ink-soft:#4a5674;
+  --navy:#141a35; --navy-2:#1c2347; --navy-3:#283160; --line:rgba(245,238,220,.14);
+  --cream:#f5eedc; --cream-2:#e8dec4; --paper:#fffaf0; --ink:#141a35; --ink-soft:#4c5276;
   --muted:rgba(245,238,220,.66);
-  --green:#2ee27e; --green-deep:#0c6b39; --gold:#f5c445; --warm:#ff9d57; --rose:#f39191;
-  --tape:#f2d36b;
-  --t-nofit:#2a3c68; --t-compatible:#cdb497; --t-fit:#ff9d57; --t-suited:#86c9ea; --t-tailored:#2ee27e; --t-aptly:#f5c445;
+  --green:#34c27a; --green-deep:#13683f; --gold:#e8c25a; --gold-deep:#8d6a17; --warm:#f0a04b; --rose:#e8697a;
+  --t-nofit:#a0525e; --t-compatible:#8a86a8; --t-fit:#34c27a; --t-suited:#3aa0c8; --t-tailored:#8b5cf6; --t-aptly:#e8c25a;
   --display:"Bricolage Grotesque", "Avenir Next", "Segoe UI", system-ui, sans-serif;
   --body:"Atkinson Hyperlegible", "Segoe UI", system-ui, -apple-system, sans-serif;
   color-scheme:dark;
@@ -31,25 +30,25 @@ html,body{background:var(--navy)}
 body{
   color:var(--cream); font-family:var(--body); font-size:16px; line-height:1.5; min-height:100%;
   padding-left:max(16px, env(safe-area-inset-left, 0px)); padding-right:max(16px, env(safe-area-inset-right, 0px));
-  background:
-    repeating-linear-gradient(45deg, rgba(255,255,255,.018) 0 2px, transparent 2px 7px),
-    repeating-linear-gradient(-45deg, rgba(255,255,255,.012) 0 2px, transparent 2px 7px),
-    radial-gradient(120% 60% at 50% -10%, var(--navy-3) 0%, var(--navy) 60%) fixed, var(--navy);
+  background:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='88' height='88' viewBox='0 0 100 100'%3E%3Cpath d='M15 30H40C36 14 64 14 60 30H85V45C101 41 101 69 85 65V90H15Z' fill='none' stroke='white' stroke-opacity='0.05' stroke-width='2'/%3E%3C/svg%3E") 0 0/88px 88px, var(--navy);
 }
 .app{max-width:620px; margin:0 auto; padding-block:18px 40px; display:flex; flex-direction:column; gap:18px}
 button{font:inherit; cursor:pointer}
-:focus-visible{outline:3px solid var(--green); outline-offset:2px}
+:focus-visible{outline:3px solid var(--gold); outline-offset:2px}
 .sr{position:absolute; width:1px; height:1px; overflow:hidden; clip:rect(0 0 0 0); white-space:nowrap}
+.pc{display:block; overflow:visible}
+.pc path{fill:currentColor}
 
-/* Measuring-tape texture, shared by the timer, the ladder and the APTLY snap */
-.ticks{background-color:var(--tape);
-  background-image:repeating-linear-gradient(90deg, var(--ink) 0 2px, transparent 2px 40px), repeating-linear-gradient(90deg, rgba(19,32,61,.6) 0 1px, transparent 1px 8px);
-  background-size:100% 58%, 100% 30%; background-repeat:no-repeat; background-position:0 0, 0 0}
+/* Shake the game container, scaled by how badly it fit */
+.app.shake{animation:shake .5s .28s both}
+@keyframes shake{
+  12%{transform:translate(calc(var(--amp)*-1), calc(var(--amp)*.3))} 26%{transform:translate(var(--amp), calc(var(--amp)*-.3))}
+  40%{transform:translate(calc(var(--amp)*-.7),0)} 55%{transform:translate(calc(var(--amp)*.5),0)} 70%{transform:translate(calc(var(--amp)*-.3),0)} 85%{transform:translate(calc(var(--amp)*.15),0)} 100%{transform:none}}
 
 /* Top bar */
-.top{display:flex; align-items:center; justify-content:space-between; gap:12px; flex-wrap:wrap; padding-bottom:14px; border-bottom:2px dashed var(--line)}
+.top{display:flex; align-items:center; justify-content:space-between; gap:12px; flex-wrap:wrap; padding-bottom:14px; border-bottom:1px solid var(--line)}
 .mark{font-family:var(--display); font-weight:800; font-size:34px; letter-spacing:-.045em; line-height:1; color:var(--cream)}
-.mark span{color:var(--green)}
+.mark span{color:var(--gold)}
 .score{display:flex; align-items:baseline; gap:8px; padding:8px 14px; border:1px solid var(--line); border-radius:999px; background:var(--navy-2)}
 .score small{font-size:11px; letter-spacing:.12em; text-transform:uppercase; color:var(--muted)}
 .score b{font-family:var(--display); font-size:20px; font-variant-numeric:tabular-nums; color:var(--cream)}
@@ -63,44 +62,27 @@ button{font:inherit; cursor:pointer}
   border:2px dashed var(--line); font-family:var(--display); font-weight:700; font-size:15px; color:var(--muted); transition:all .25s}
 .pip span{font-size:11px; color:var(--muted); font-variant-numeric:tabular-nums; min-height:16px}
 .pip.cur b{border:2px solid var(--cream); color:var(--cream); box-shadow:0 0 0 4px rgba(245,238,220,.1)}
-.pip[class*="t-"] b{border-style:solid; color:var(--ink)}
-.pip.t-nofit b{background:var(--t-nofit); border-color:var(--t-nofit); color:var(--muted)}
+.pip[class*="t-"] b{border-style:solid; color:#fff}
+.pip.t-nofit b{background:var(--t-nofit); border-color:var(--t-nofit)}
 .pip.t-compatible b{background:var(--t-compatible); border-color:var(--t-compatible)}
-.pip.t-fit b{background:var(--t-fit); border-color:var(--t-fit)}
+.pip.t-fit b{background:var(--t-fit); border-color:var(--t-fit); color:var(--ink)}
 .pip.t-suited b{background:var(--t-suited); border-color:var(--t-suited)}
 .pip.t-tailored b{background:var(--t-tailored); border-color:var(--t-tailored)}
-.pip.t-aptly b{background:var(--ink); border-color:var(--gold); color:var(--gold); box-shadow:0 0 0 3px rgba(245,196,69,.25)}
+.pip.t-aptly b{background:var(--t-aptly); border-color:var(--t-aptly); color:var(--ink); box-shadow:0 0 0 3px rgba(232,194,90,.3)}
 
-/* Clothing-label tags: the tier word "sewn on" */
-.tag{--tc:var(--t-fit); position:relative; display:inline-flex; align-items:center; padding:10px 18px 10px 32px; background:var(--tc); color:var(--ink);
-  font-family:var(--display); font-weight:800; letter-spacing:.06em; text-transform:uppercase; font-size:15px; line-height:1; border-radius:4px 12px 12px 4px; white-space:nowrap}
-.tag::before{content:""; position:absolute; left:11px; top:50%; width:9px; height:9px; margin-top:-4.5px; border-radius:50%; background:var(--navy); box-shadow:0 0 0 2px rgba(19,32,61,.35)}
-.tag::after{content:""; position:absolute; inset:4px 5px 4px 24px; border:1.5px dashed rgba(19,32,61,.5); border-radius:2px 9px 9px 2px; pointer-events:none}
-.tag.sm{font-size:11px; padding:7px 11px 7px 23px}
-.tag.sm::before{left:8px; width:7px; height:7px; margin-top:-3.5px}
-.tag.sm::after{inset:3px 4px 3px 17px}
-.tag.t-nofit{--tc:var(--t-nofit); color:var(--muted)} .tag.t-nofit::after{border-color:rgba(245,238,220,.3)}
-.tag.t-compatible{--tc:var(--t-compatible)} .tag.t-fit{--tc:var(--t-fit)} .tag.t-suited{--tc:var(--t-suited)} .tag.t-tailored{--tc:var(--t-tailored)}
-.tag.t-aptly{--tc:var(--ink); color:var(--gold); box-shadow:0 0 0 2px var(--gold)}
-.tag.t-aptly::after{border-color:var(--gold)} .tag.t-aptly::before{background:var(--gold); box-shadow:none}
-
-/* Tier entrances: each one fits a little better than the last */
-.a-nofit{animation:droop .7s ease-out both}
-.a-compatible{transform-origin:15px 50%; animation:swing 1.2s ease-out both}
-.a-fit{animation:slidein .45s ease-out both}
-.a-suited{animation:slidein .45s ease-out both} .a-suited::after{animation:sew .7s .35s both}
-.a-tailored{animation:slidein .45s ease-out both} .a-tailored::after{animation:sew .7s .3s both} .a-tailored::before{animation:pinpop .45s 1s both}
-.a-aptly{animation:stamp .55s cubic-bezier(.2,1.6,.4,1) both} .a-aptly::after{animation:sew .8s .35s both}
-@keyframes droop{0%{transform:translateY(-14px); opacity:0} 60%{transform:translateY(4px) rotate(-9deg); opacity:1} 100%{transform:translateY(3px) rotate(-6deg)}}
-@keyframes swing{0%{transform:rotate(20deg); opacity:0} 30%{transform:rotate(-11deg); opacity:1} 55%{transform:rotate(6deg)} 78%{transform:rotate(-4deg)} 100%{transform:rotate(-2.5deg)}}
-@keyframes slidein{from{transform:translateX(-24px); opacity:0} to{transform:none; opacity:1}}
-@keyframes sew{from{clip-path:inset(0 100% 0 0)} to{clip-path:inset(0 0 0 0)}}
-@keyframes pinpop{0%{transform:scale(1)} 50%{transform:scale(1.8); background:var(--gold)} 100%{transform:scale(1)}}
-@keyframes stamp{0%{transform:scale(.3) rotate(-8deg); opacity:0} 100%{transform:scale(1) rotate(-2deg); opacity:1}}
+/* Tier tags: a small piece icon plus the tier word */
+.tag{--tc:var(--t-fit); display:inline-flex; align-items:center; gap:8px; padding:8px 14px 8px 10px; border-radius:10px; background:var(--tc); color:#fff;
+  font-family:var(--display); font-weight:800; letter-spacing:.06em; text-transform:uppercase; font-size:15px; line-height:1; white-space:nowrap}
+.tag .pc{width:18px; height:18px; color:rgba(255,255,255,.85)}
+.tag.sm{font-size:11px; padding:6px 10px 6px 7px; gap:5px; border-radius:8px}
+.tag.sm .pc{width:13px; height:13px}
+.tag.t-nofit{--tc:var(--t-nofit)} .tag.t-compatible{--tc:var(--t-compatible)} .tag.t-suited{--tc:var(--t-suited)} .tag.t-tailored{--tc:var(--t-tailored)}
+.tag.t-fit{--tc:var(--t-fit); color:var(--ink)} .tag.t-fit .pc{color:rgba(20,26,53,.7)}
+.tag.t-aptly{--tc:var(--t-aptly); color:var(--ink); box-shadow:0 0 0 2px rgba(232,194,90,.35)} .tag.t-aptly .pc{color:var(--gold-deep)}
 
 /* Shared pieces */
 .eyebrow{margin:0; font-size:12px; letter-spacing:.14em; text-transform:uppercase; color:var(--muted)}
-.btn{border:0; border-radius:12px; padding:13px 20px; font-weight:700; font-size:16px; background:var(--green); color:var(--ink); transition:transform .1s, filter .15s}
+.btn{border:0; border-radius:12px; padding:13px 20px; font-weight:700; font-size:16px; background:var(--gold); color:var(--ink); transition:transform .1s, filter .15s}
 .btn:hover{filter:brightness(1.06)} .btn:active{transform:translateY(1px)}
 .btn.cream{background:var(--cream); color:var(--ink)}
 .btn.wide{width:100%}
@@ -114,20 +96,18 @@ h3.sec{margin:6px 0 0; font-family:var(--display); font-weight:750; font-size:22
 .hero em{font-style:normal; color:var(--gold)}
 .lede{margin:0; color:var(--muted); max-width:52ch}
 .lineup{list-style:none; margin:0; padding:0; display:grid; gap:6px}
-.lineup li{display:flex; align-items:center; gap:12px; padding:10px 14px; border-radius:12px; background:var(--navy-2); border:1px dashed var(--line)}
+.lineup li{display:flex; align-items:center; gap:12px; padding:10px 14px; border-radius:12px; background:var(--navy-2); border:1px solid var(--line)}
 .lineup .n{font-family:var(--display); font-weight:700; color:var(--muted); width:18px; font-variant-numeric:tabular-nums}
 .lineup .nm{font-weight:700; flex:1; min-width:0}
 .lineup .d{color:var(--gold); letter-spacing:2px; font-size:12px}
-.tiers{list-style:none; margin:0; padding:4px 0 4px 40px; position:relative; display:grid; gap:12px}
-.tiers::before{content:""; position:absolute; left:0; top:0; bottom:0; width:24px; border-radius:4px; background-color:var(--tape);
-  background-image:repeating-linear-gradient(180deg, var(--ink) 0 2px, transparent 2px 40px), repeating-linear-gradient(180deg, rgba(19,32,61,.6) 0 1px, transparent 1px 8px);
-  background-size:58% 100%, 30% 100%; background-repeat:no-repeat}
-.tier-row{display:grid; grid-template-columns:150px minmax(0,1fr); gap:2px 12px; align-items:center}
+.tiers{list-style:none; margin:0; padding:0; display:grid; gap:8px}
+.tier-row{display:grid; grid-template-columns:30px 140px minmax(0,1fr); gap:2px 12px; align-items:center; padding:8px 12px; border-radius:12px; background:var(--navy-2); border:1px solid var(--line)}
+.tier-row > .pc{width:30px; height:30px}
 .tier-row .tag{justify-self:start}
 .tier-row .rng{font-family:var(--display); font-weight:700; font-variant-numeric:tabular-nums}
 .tier-row .bl{display:block; color:var(--muted); font-size:14px; font-family:var(--body); font-weight:400}
 .rules{display:grid; grid-template-columns:repeat(3,1fr); gap:8px}
-.rules div{padding:12px; border-radius:12px; border:1px dashed var(--line); font-size:13px; color:var(--muted)}
+.rules div{padding:12px; border-radius:12px; border:1px solid var(--line); background:var(--navy-2); font-size:13px; color:var(--muted)}
 .rules b{display:block; font-family:var(--display); font-size:20px; color:var(--cream)}
 .streakline{margin:0; text-align:center; color:var(--muted); font-size:14px}
 .streakline b{color:var(--gold)}
@@ -139,22 +119,23 @@ h3.sec{margin:6px 0 0; font-family:var(--display); font-weight:750; font-size:22
 .cat{font-family:var(--display); font-weight:750; font-size:clamp(28px, 7vw, 38px); letter-spacing:-.03em; line-height:1.05; margin:0}
 .how{margin:0; color:var(--muted)}
 
-/* Tape-measure timer: the tape reels back into its case */
-.timer{display:flex; align-items:center; gap:10px}
-.case{flex:none; width:44px; height:44px; border-radius:12px; background:var(--navy-3); border:2px solid var(--line); display:grid; place-items:center; position:relative; z-index:1}
-.hub{width:16px; height:16px; border-radius:50%; border:3px solid var(--cream); border-top-color:transparent; animation:spin 1.4s linear infinite}
-.tape-track{flex:1; position:relative; height:24px; margin-left:-14px}
-.tape{position:absolute; left:0; top:0; bottom:0; width:100%; overflow:hidden; border-radius:0 3px 3px 0}
-.strip{position:absolute; right:0; top:0; bottom:0; width:600px}
-.hook{position:absolute; right:0; top:0; bottom:0; width:6px; background:#a9b1c3}
+/* Clock: ten pieces, one drops away every three seconds */
+.timer{display:flex; align-items:center; gap:12px; color:var(--cream)}
+.pieces{flex:1; display:flex; gap:3px; min-width:0}
+.tp{flex:1; max-width:34px; aspect-ratio:1; transition:transform .5s ease-in, opacity .5s ease-in}
+.tp.gone{transform:translateY(22px) rotate(35deg); opacity:0}
 .secs{flex:none; width:46px; text-align:right; font-family:var(--display); font-weight:800; font-size:24px; font-variant-numeric:tabular-nums}
-.timer.low{--tape:#f7b267} .timer.low .secs{color:var(--warm)}
-.timer.crit{--tape:#f39191} .timer.crit .secs{color:var(--rose); animation:pulse .8s ease-in-out infinite}
-@keyframes spin{to{transform:rotate(360deg)}}
+.timer.low{color:var(--warm)}
+.timer.crit{color:var(--rose)} .timer.crit .secs{animation:pulse .8s ease-in-out infinite}
 @keyframes pulse{50%{transform:scale(1.15)}}
 
-.card{background:var(--cream); color:var(--ink); border-radius:20px; padding:22px; display:flex; flex-direction:column; gap:16px;
-  outline:2px dashed rgba(19,32,61,.22); outline-offset:-9px; box-shadow:0 18px 40px -18px rgba(0,0,0,.6)}
+/* Puzzle card: a cream jigsaw piece, knob on top and on the right */
+.card{position:relative; background:var(--cream); color:var(--ink); border-radius:16px; padding:24px 22px 22px; margin:16px 16px 0 0; display:flex; flex-direction:column; gap:16px;
+  box-shadow:0 18px 40px -18px rgba(0,0,0,.6)}
+.card::before,.card::after{content:""; position:absolute; width:34px; height:34px; border-radius:50%; background:var(--cream)}
+.card::before{top:-15px; left:50%; margin-left:-17px}
+.card::after{right:-15px; top:50%; margin-top:-17px}
+.card > *{position:relative; z-index:1}
 .q{margin:0; font-family:var(--display); font-weight:600; font-size:clamp(20px, 5vw, 25px); line-height:1.25; letter-spacing:-.015em; text-wrap:balance}
 .q.seq{font-size:clamp(22px, 6.5vw, 32px); letter-spacing:.02em; font-variant-numeric:tabular-nums}
 .q .blank{display:inline-block; min-width:2.6em; border-bottom:3px solid var(--ink); color:transparent}
@@ -164,7 +145,7 @@ h3.sec{margin:6px 0 0; font-family:var(--display); font-weight:750; font-size:22
 .steps-flow .s{padding:6px 10px; border-radius:8px; font-family:var(--display); font-weight:700; letter-spacing:.06em; text-transform:uppercase; font-size:14px; background:var(--cream-2); color:var(--ink-soft)}
 .steps-flow .s.on{background:var(--ink); color:var(--cream)}
 .steps-flow .s.got{background:var(--green-deep); color:var(--paper)}
-.steps-flow .s.half{background:#b4651f; color:var(--paper)}
+.steps-flow .s.half{background:#a2551c; color:var(--paper)}
 .steps-flow .s.miss{background:var(--ink-soft); color:var(--paper); text-decoration:line-through}
 .steps-flow .ar{color:var(--ink-soft)}
 .stage{font-size:12px; letter-spacing:.12em; text-transform:uppercase; color:var(--ink-soft); margin:0}
@@ -175,14 +156,14 @@ h3.sec{margin:6px 0 0; font-family:var(--display); font-weight:750; font-size:22
 .ansrow .btn{flex:none; background:var(--ink); color:var(--cream)}
 .ansrow.col{flex-direction:column}
 .tries{margin:0; font-size:13px; color:var(--ink-soft); display:flex; justify-content:space-between; gap:8px; flex-wrap:wrap}
-.hint{margin:0; font-size:14px; font-weight:700; color:#a2440c; min-height:0}
+.hint{margin:0; font-size:14px; font-weight:700; color:#a2440c}
 .hint:empty{display:none}
 .opts{display:grid; grid-template-columns:repeat(2, minmax(0,1fr)); gap:8px}
 .opts.long{grid-template-columns:1fr}
 .opt{text-align:left; padding:13px 14px; border-radius:12px; border:2px solid transparent; background:var(--cream-2); color:var(--ink); font-weight:700; font-size:16px; line-height:1.3}
 .opt:hover:not(:disabled){border-color:var(--ink)}
 .opt:disabled{cursor:default}
-.opt.wrong{border-color:#c4473f; color:var(--ink-soft); text-decoration:line-through}
+.opt.wrong{border-color:#b8454f; color:var(--ink-soft); text-decoration:line-through}
 .opt.right{background:var(--green); border-color:var(--green-deep)}
 .opt.chosen{border-color:var(--ink)}
 .opt .pts{display:block; font-weight:400; font-size:13px; margin-top:4px; text-decoration:none}
@@ -195,14 +176,41 @@ h3.sec{margin:6px 0 0; font-family:var(--display); font-weight:750; font-size:22
 .wc.over{color:#b4430a; font-weight:700}
 .actions{display:flex; justify-content:flex-end}
 
-/* Result */
+/* Result: a piece drops into the empty slot of a small board */
 .reveal{padding:18px; border-radius:16px; background:var(--navy-2); border:1px solid var(--line); display:flex; flex-direction:column; gap:12px}
-.verdict{display:flex; align-items:center; justify-content:space-between; gap:12px; flex-wrap:wrap}
+.verdict{display:flex; align-items:center; gap:16px; flex-wrap:wrap}
+.board{display:flex; padding:10px 12px 6px; border-radius:12px; background:rgba(0,0,0,.22)}
+.board .pc{width:52px; height:52px; margin-right:-8px}
+.board .cell{color:var(--navy-3)}
+.slot{position:relative; width:52px; height:52px; margin-right:-8px}
+.slot .pc{position:absolute; inset:0; margin:0}
+.hole path{fill:rgba(0,0,0,.35); stroke:rgba(245,238,220,.35); stroke-width:2.5; stroke-dasharray:6 5}
+.drop{color:var(--tc); transform-box:fill-box; transform-origin:center}
+.drop.p-nofit{--tc:var(--t-nofit); opacity:0}
+.drop.p-compatible{--tc:var(--t-compatible); transform:translate(4px,-9px) rotate(13deg)}
+.drop.p-fit{--tc:var(--t-fit); transform:translate(2px,-3px) rotate(5deg)}
+.drop.p-suited{--tc:var(--t-suited)}
+.drop.p-tailored{--tc:var(--t-tailored); filter:drop-shadow(0 0 5px rgba(139,92,246,.9))}
+.drop.p-aptly{--tc:var(--t-aptly); filter:drop-shadow(0 0 7px rgba(232,194,90,.95))}
+.drop.go.p-nofit{animation:d-nofit 1s ease-in both}
+.drop.go.p-compatible{animation:d-compatible .75s ease-out both}
+.drop.go.p-fit{animation:d-fit .7s ease-out both}
+.drop.go.p-suited{animation:d-suited .9s ease-out both}
+.drop.go.p-tailored{animation:d-snap .55s cubic-bezier(.3,1.4,.5,1) both, glow-p 1s .5s ease-out both}
+.drop.go.p-aptly{animation:d-snap .55s cubic-bezier(.3,1.4,.5,1) both, glow-g .8s .5s ease-in-out 2 both}
+@keyframes d-nofit{0%{transform:translateY(-80px); opacity:0} 10%{opacity:1} 30%{transform:translateY(0)} 45%{transform:translate(-3px,-10px) rotate(-25deg); opacity:1} 100%{transform:translate(40px,120px) rotate(220deg); opacity:0}}
+@keyframes d-compatible{0%{transform:translateY(-80px); opacity:0} 15%{opacity:1} 45%{transform:translateY(0)} 70%{transform:translate(6px,-12px) rotate(18deg)} 100%{transform:translate(4px,-9px) rotate(13deg)}}
+@keyframes d-fit{0%{transform:translateY(-80px); opacity:0} 15%{opacity:1} 50%{transform:translateY(0)} 75%{transform:translate(3px,-5px) rotate(8deg)} 100%{transform:translate(2px,-3px) rotate(5deg)}}
+@keyframes d-suited{0%{transform:translateY(-80px); opacity:0} 12%{opacity:1} 38%{transform:translateY(0)} 52%{transform:rotate(-8deg)} 66%{transform:rotate(6deg)} 80%{transform:rotate(-3deg)} 100%{transform:none}}
+@keyframes d-snap{0%{transform:translateY(-80px); opacity:0} 15%{opacity:1} 60%{transform:translateY(0) scale(1.1)} 100%{transform:none}}
+@keyframes glow-p{0%{filter:drop-shadow(0 0 0 rgba(139,92,246,0))} 50%{filter:drop-shadow(0 0 12px rgba(139,92,246,1))} 100%{filter:drop-shadow(0 0 5px rgba(139,92,246,.9))}}
+@keyframes glow-g{0%{filter:drop-shadow(0 0 2px rgba(232,194,90,.6))} 50%{filter:drop-shadow(0 0 16px rgba(232,194,90,1))} 100%{filter:drop-shadow(0 0 7px rgba(232,194,90,.95))}}
+.vbox{display:flex; flex-direction:column; align-items:flex-start; gap:6px}
 .verdict .pts{font-family:var(--display); font-weight:800; font-size:28px; font-variant-numeric:tabular-nums}
 .vline{margin:0; font-weight:700}
 .vline .time{font-weight:400; color:var(--muted)}
 .given{margin:0; color:var(--muted)} .given b{color:var(--cream)}
-.slip{border-top:2px dashed var(--line); padding-top:12px; display:flex; flex-direction:column; gap:8px}
+.slip{border-top:1px solid var(--line); padding-top:12px; display:flex; flex-direction:column; gap:8px}
 .slip .ans{margin:0; font-family:var(--display); font-weight:700; font-size:21px; line-height:1.25}
 .slip .ex{margin:0; color:var(--muted)}
 .grades{list-style:none; margin:0; padding:0; display:grid; gap:6px; font-size:14px}
@@ -212,12 +220,11 @@ h3.sec{margin:6px 0 0; font-family:var(--display); font-weight:750; font-size:22
 
 /* Results */
 .results{display:flex; flex-direction:column; gap:18px}
-.final{text-align:center; padding:26px 18px; border-radius:22px; background:var(--cream); color:var(--ink); display:flex; flex-direction:column; gap:6px; align-items:center;
-  outline:2px dashed rgba(19,32,61,.25); outline-offset:-10px}
+.final{text-align:center; padding:26px 18px; border-radius:22px; background:var(--cream); color:var(--ink); display:flex; flex-direction:column; gap:6px; align-items:center}
 .final .eyebrow{color:var(--ink-soft)}
 .big{font-family:var(--display); font-weight:800; font-size:clamp(64px, 20vw, 104px); line-height:.95; letter-spacing:-.05em; font-variant-numeric:tabular-nums}
 .big small{font-size:.32em; letter-spacing:0; color:var(--ink-soft); font-weight:600}
-.final.gold{background:linear-gradient(160deg, #fff3cf, var(--gold))}
+.final.gold{background:linear-gradient(160deg, #fff4d4, var(--gold))}
 .rating{margin:4px 0 0; font-family:var(--display); font-weight:750; font-size:28px; letter-spacing:-.02em}
 .final .note{margin:0; font-size:13px; color:var(--ink-soft)}
 .tiercount{display:grid; grid-template-columns:repeat(3, minmax(0,1fr)); gap:8px}
@@ -240,28 +247,26 @@ h3.sec{margin:6px 0 0; font-family:var(--display); font-weight:750; font-size:22
 .next b{color:var(--cream); font-variant-numeric:tabular-nums; font-family:var(--display)}
 footer{color:var(--muted); font-size:12px; text-align:center}
 
-/* APTLY! moment: a tape measure snaps into place, gold stitching runs along it */
-.pop{position:fixed; inset:0; z-index:50; display:grid; place-items:center; background:rgba(13,24,48,.8); backdrop-filter:blur(3px); -webkit-backdrop-filter:blur(3px);
+/* APTLY! hero moment: a gold stamp scales down into place */
+.pop{position:fixed; inset:0; z-index:50; display:grid; place-items:center; background:rgba(20,26,53,.62);
   padding:env(safe-area-inset-top,0px) max(16px, env(safe-area-inset-right,0px)) env(safe-area-inset-bottom,0px) max(16px, env(safe-area-inset-left,0px)); cursor:pointer}
-.pop-in{display:flex; flex-direction:column; align-items:center; gap:14px; text-align:center; width:min(540px, 100%)}
-.snap{position:relative; width:100%; height:34px}
-.snap-tape{position:absolute; inset:0; border-radius:4px; transform-origin:left center}
-.snap-tape::after{content:""; position:absolute; right:-4px; top:-5px; bottom:-5px; width:8px; border-radius:2px; background:#a9b1c3}
-.snap-stitch{position:absolute; left:0; right:0; bottom:-12px; border-top:3px dashed var(--gold)}
-.pop-word{font-family:var(--display); font-weight:800; font-size:clamp(64px, 19vw, 132px); letter-spacing:-.05em; line-height:1; color:var(--gold); text-shadow:0 6px 0 #8a6510}
+.pop-in{display:flex; flex-direction:column; align-items:center; gap:12px; text-align:center}
+.pop-piece{width:84px; height:84px; color:var(--gold); filter:drop-shadow(0 0 18px rgba(232,194,90,.9))}
+.pop-word{font-family:var(--display); font-weight:800; font-size:clamp(64px, 19vw, 132px); letter-spacing:-.05em; line-height:1; color:var(--gold);
+  text-shadow:0 6px 0 var(--gold-deep), 0 0 40px rgba(232,194,90,.45); transform:rotate(-3deg)}
 .pop-sub{font-size:20px; font-weight:700; color:var(--cream)}
 .pop-sub b{color:var(--gold)}
-.pop.go .snap-tape{animation:snap .55s cubic-bezier(.3,1.45,.5,1) both}
-.pop.go .snap-stitch{animation:sew .6s .45s both}
-.pop.go .pop-word{animation:stamp .5s .25s cubic-bezier(.2,1.6,.4,1) both}
-.pop.go .pop-sub{animation:slidein .4s .6s ease-out both}
-@keyframes snap{0%{transform:scaleX(0)} 100%{transform:scaleX(1)}}
+.pop.go .pop-piece{animation:d-snap .5s cubic-bezier(.3,1.4,.5,1) both, glow-g .8s .4s ease-in-out 2 both}
+.pop.go .pop-word{animation:stamp .55s .15s cubic-bezier(.2,1.3,.4,1) both}
+.pop.go .pop-sub{animation:rise .4s .55s ease-out both}
+@keyframes stamp{0%{transform:scale(2.6) rotate(-10deg); opacity:0} 60%{opacity:1} 100%{transform:scale(1) rotate(-3deg); opacity:1}}
+@keyframes rise{from{transform:translateY(10px); opacity:0} to{transform:none; opacity:1}}
 
 @media (prefers-reduced-motion: reduce){
   *,*::before,*::after{animation:none!important; transition:none!important}
 }
 @media (max-width:460px){
-  .card{padding:18px}
+  .card{padding:22px 18px 18px}
   .opts{grid-template-columns:1fr}
   .rules{grid-template-columns:1fr}
   .rules div{display:flex; align-items:baseline; gap:10px}
@@ -269,8 +274,10 @@ footer{color:var(--muted); font-size:12px; text-align:center}
   .ansrow:not(.col){flex-direction:column}
   .mark{font-size:30px}
   .pip span{font-size:10px}
-  .tier-row{grid-template-columns:128px minmax(0,1fr)}
+  .tier-row{grid-template-columns:26px minmax(0,1fr); padding:8px 10px}
+  .tier-row > .pc{width:26px; height:26px; grid-row:span 2}
   .tiercount{grid-template-columns:repeat(2, minmax(0,1fr))}
+  .board .pc,.slot{width:44px; height:44px}
 }
 </style>
 
@@ -618,12 +625,12 @@ CATS.smaller.h="Answer, then answer again as the rule gets tighter. One guess pe
 
 const LIMIT=30;
 const TIERS=[
-  {k:"aptly",     n:"APTLY!",      min:95, max:100, b:"A perfect fit, made in moments."},
-  {k:"tailored",  n:"Tailored",    min:80, max:94,  b:"Measured, cut and stitched."},
-  {k:"suited",    n:"Suited",      min:60, max:79,  b:"Smart. Looks made for it."},
-  {k:"fit",       n:"Fit",         min:30, max:59,  b:"Off the rack, and it works."},
-  {k:"compatible",n:"Compatible",  min:1,  max:29,  b:"It goes on. Just about."},
-  {k:"nofit",     n:"Doesn't Fit", min:0,  max:0,   b:"Back to the cutting table."}
+  {k:"aptly",     n:"APTLY!",      min:95, max:100, b:"Snapped in perfectly, in moments."},
+  {k:"tailored",  n:"Tailored",    min:80, max:94,  b:"A clean, satisfying snap."},
+  {k:"suited",    n:"Suited",      min:60, max:79,  b:"A little wiggle, then it sits right."},
+  {k:"fit",       n:"Fit",         min:30, max:59,  b:"It goes in, slightly off."},
+  {k:"compatible",n:"Compatible",  min:1,  max:29,  b:"Jammed in at an angle."},
+  {k:"nofit",     n:"Doesn't Fit", min:0,  max:0,   b:"Wrong piece. It bounced right out."}
 ];
 const tierOf=s=>TIERS.find(t=>s>=t.min);
 /* Correct: 60 + up to 40 for speed. Six seconds or less keeps the full 40; APTLY! needs about nine seconds or less. */
@@ -664,7 +671,10 @@ const esc=s=>String(s).replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;"
 const fmt=n=>Number(n).toLocaleString("en-US");
 const cap=s=>s.charAt(0).toUpperCase()+s.slice(1);
 const dots=d=>"●".repeat(d)+"○".repeat(3-d);
-const tagHTML=(t,extra="")=>`<span class="tag t-${t.k} ${extra}">${t.n}</span>`;
+const PIECE="M15 30H40C36 14 64 14 60 30H85V45C101 41 101 69 85 65V90H15Z";
+const pieceSVG=(cls="",style="")=>`<svg class="pc ${cls}" viewBox="0 0 100 100" aria-hidden="true"${style?` style="${style}"`:""}><path d="${PIECE}"/></svg>`;
+const tagHTML=(t,extra="")=>`<span class="tag t-${t.k} ${extra}">${pieceSVG()}${t.n}</span>`;
+const SHAKE={nofit:12,compatible:7,fit:4,suited:1.5};
 function rating(t){
   if(t>=700) return "Perfectly Aptly";
   if(t>=640) return "Mastermind";
@@ -704,10 +714,10 @@ function renderIntro(){
   <section class="intro">
     <p class="eyebrow">No. ${Math.max(1,S.day-LAUNCH+1)} · ${esc(dateStr)}</p>
     <h1 class="hero">Seven puzzles. One guess each. <em>Thirty seconds.</em></h1>
-    <p class="lede">The tape starts running the moment a puzzle appears. A right answer always fits; a fast right answer fits perfectly. Synonyms, plurals and small typos all count.</p>
-    <div class="rules"><div><b>1</b> guess per puzzle</div><div><b>30s</b> on the tape</div><div><b>700</b> is a perfect day</div></div>
+    <p class="lede">The clock starts the moment a puzzle appears. A right answer always fits; a fast right answer snaps in perfectly. Synonyms, plurals and small typos all count.</p>
+    <div class="rules"><div><b>1</b> guess per puzzle</div><div><b>30s</b> on the clock</div><div><b>700</b> is a perfect day</div></div>
     <h3 class="sec">The fit ladder</h3>
-    <ol class="tiers">${TIERS.map(t=>`<li class="tier-row">${tagHTML(t)}<span class="rng">${t.min===t.max?t.min:`${t.min}–${t.max}`} pts<span class="bl">${esc(t.b)}</span></span></li>`).join("")}</ol>
+    <ol class="tiers">${TIERS.map(t=>`<li class="tier-row">${pieceSVG("","color:var(--t-"+t.k+")")}${tagHTML(t)}<span class="rng">${t.min===t.max?t.min:`${t.min}–${t.max}`} pts<span class="bl">${esc(t.b)}</span></span></li>`).join("")}</ol>
     <h3 class="sec">Today's fitting</h3>
     <ol class="lineup">${S.picks.map((id,i)=>{const p=BY_ID[id];return `<li><span class="n">${i+1}</span><span class="nm">${CATS[p.c].n}</span><span class="d" aria-label="Difficulty ${p.d} of 3">${dots(p.d)}</span></li>`}).join("")}</ol>
     <button class="btn wide" id="start">${resume?`Resume round ${S.cur+1}`:"Start round 1"}</button>
@@ -718,18 +728,17 @@ function renderIntro(){
 
 /* ---------------- Timer ---------------- */
 function timerHTML(){
-  return `<div class="timer" id="timer"><div class="case" aria-hidden="true"><span class="hub"></span></div>
-    <div class="tape-track" id="tt" aria-hidden="true"><div class="tape" id="tape"><div class="strip ticks" id="strip"></div><i class="hook"></i></div></div>
+  return `<div class="timer" id="timer"><div class="pieces" aria-hidden="true">${Array.from({length:10},()=>pieceSVG("tp")).join("")}</div>
     <b class="secs" id="secs" role="timer" aria-label="Seconds left">${LIMIT}</b></div>`;
 }
-function sizeTape(){ const t=$("#tt"), s=$("#strip"); if(t&&s) s.style.width=t.clientWidth+"px"; }
-addEventListener("resize",sizeTape);
+function sizeTape(){}
 function tick(){
   const r=S&&S.r[S.cur]; if(!r||r.done||!r.t0||!S.started) return;
   const left=Math.max(0,LIMIT-elapsed());
-  const tp=$("#tape");
-  if(tp){
-    tp.style.width=(left/LIMIT*100)+"%";
+  const tm0=$("#timer");
+  if(tm0){
+    const keep=Math.ceil(left/3);
+    document.querySelectorAll(".tp").forEach((el,i)=>{ const g=i>=keep; if(el.classList.contains("gone")!==g) el.classList.toggle("gone",g); });
     const n=String(Math.ceil(left)), s=$("#secs"); if(s.textContent!==n) s.textContent=n;
     const tm=$("#timer"); tm.classList.toggle("low",left<=10&&left>5); tm.classList.toggle("crit",left<=5);
   }
@@ -771,7 +780,7 @@ function finish(pts,how,msg){
   save();
   if(allDone()) bumpStreak();
   animateTag=true;
-  if(tierOf(r.score).k==="aptly") pop(r.score);
+  if(tierOf(r.score).k==="aptly") setTimeout(()=>pop(r.score), matchMedia("(prefers-reduced-motion: reduce)").matches?0:500);
   renderChrome(); renderRound();
 }
 const timeUp=()=>{ if(elapsed()>=LIMIT){ finish(0,"timeout"); return true; } return false; };
@@ -793,7 +802,7 @@ function showReveal(p,r){
     right: t.b,
     near: "Close, but not a perfect fit. "+(r.msg||""),
     wrong: "That one doesn't fit. "+(r.msg||""),
-    timeout: "Out of time. The tape ran out.",
+    timeout: "Out of time. The last piece dropped.",
     given: "Answer revealed."
   }[r.how]||t.b;
   const timeTxt=(r.how==="timeout"||r.how==="given")?"":` <span class="time">Answered in ${r.e.toFixed(1)}s.</span>`;
@@ -805,7 +814,10 @@ function showReveal(p,r){
   if(p.t==="rubric"&&p.bench) ex=`Our benchmark answer was “${p.bench.t}”.`;
   if(p.note) ex=(ex?ex+" ":"")+p.note;
   box.innerHTML=`
-    <div class="verdict">${tagHTML(t, animateTag?"a-"+t.k:"")}<span class="pts">+${r.score}</span></div>
+    <div class="verdict">
+      <div class="board" aria-hidden="true">${pieceSVG("cell")}${pieceSVG("cell")}<div class="slot">${pieceSVG("hole")}${pieceSVG(`drop p-${t.k} ${animateTag?"go":""}`)}</div>${pieceSVG("cell")}</div>
+      <div class="vbox">${tagHTML(t)}<span class="pts">+${r.score}</span></div>
+    </div>
     <p class="vline">${esc(line)}${timeTxt}</p>
     ${r.given?`<p class="given">You said: <b>${esc(r.given)}</b></p>`:""}
     <div class="slip">
@@ -815,6 +827,11 @@ function showReveal(p,r){
       ${extra}
     </div>
     <button class="btn ${last?"":"cream"} wide" id="next">${last?"See today's fitting":"Next round →"}</button>`;
+  if(animateTag && SHAKE[t.k]){
+    const app=$(".app"); app.style.setProperty("--amp",SHAKE[t.k]+"px");
+    app.classList.remove("shake"); void app.offsetWidth; app.classList.add("shake");
+    app.addEventListener("animationend",()=>app.classList.remove("shake"),{once:true});
+  }
   animateTag=false;
   $("#next").onclick=()=>{ if(!last){S.cur++;save();} render(); scrollTo({top:0,behavior:"smooth"}); };
 }
@@ -933,7 +950,7 @@ const TYPES={
 let popTimer;
 function pop(pts){
   const el=$("#pop");
-  $("#popin").innerHTML=`<div class="snap" aria-hidden="true"><div class="snap-tape ticks"></div><div class="snap-stitch"></div></div><div class="pop-word">APTLY!</div><div class="pop-sub">A perfect fit. <b>+${pts} points</b></div>`;
+  $("#popin").innerHTML=`${pieceSVG("pop-piece")}<div class="pop-word">APTLY!</div><div class="pop-sub">A perfect fit. <b>+${pts} points</b></div>`;
   el.hidden=false; el.classList.remove("go"); void el.offsetWidth; el.classList.add("go");
   clearTimeout(popTimer); popTimer=setTimeout(hidePop,1900);
 }
