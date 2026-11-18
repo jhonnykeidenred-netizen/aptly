@@ -306,7 +306,6 @@ const CATS = {
   closest: {n:"Closest Match",  h:"Guess the number. We'll say higher or lower, and how warm you are."},
   tool:    {n:"Best Tool",      h:"Pick the most effective tool for the job."},
   ladder:  {n:"Word Ladder",    h:"Each rung changes exactly one letter. Fill in the missing rung."},
-  say:     {n:"Say It Better",  h:"Rewrite it shorter and sharper, inside the word limit."},
   chain:   {n:"Chain Reaction", h:"Each answer joins onto the word before it to make a new word."},
   smaller: {n:"Think Smaller",  h:"Answer, then answer again as the rule gets tighter."},
   piece:   {n:"Missing Piece",  h:"Name the step that's missing from the process."}
@@ -474,13 +473,6 @@ const P = [
 {id:"lad7",c:"ladder",d:3,t:"ladder",r:["HATE","HAVE",null,"LOVE"],a:["hove","lave"]},
 {id:"lad8",c:"ladder",d:3,t:"ladder",r:["WORK",null,"PORT","POET"],a:["pork","wort"]},
 
-/* Say It Better */
-{id:"say1",c:"say",d:1,t:"say",q:"“At this point in time, we are currently in the process of reviewing your application.”",max:6,k:[["review","look","consider","assess","check","read","evaluat"],["application","app","submission","form"]],show:"“We're reviewing your application.”"},
-{id:"say2",c:"say",d:1,t:"say",q:"“Due to the fact that it was raining, the game was cancelled.”",max:5,k:[["rain","wet","storm","weather","downpour","shower"],["cancel","called off","postpone","scrap","off","abandon","washed out","stopped"]],show:"“Rain cancelled the game.”"},
-{id:"say3",c:"say",d:1,t:"say",q:"“In my personal opinion, I think that we should probably maybe leave now.”",max:4,k:[["leave","go","head","depart","exit","split","move","off"]],ban:["think","opinion","maybe","probably"],show:"“We should leave now.” or “Let's go.”"},
-{id:"say4",c:"say",d:2,t:"say",q:"“The meeting that was scheduled for Monday has been moved to a later date.”",max:5,k:[["meeting"],["monday"],["postpone","move","delay","reschedul","push","later","shift","bump"]],show:"“Monday's meeting is postponed.”"},
-{id:"say5",c:"say",d:2,t:"say",q:"Sum up the story of <i>Romeo and Juliet</i>.",max:5,k:[["love","lover","romance","romantic","sweetheart","couple"],["die","died","dead","death","tragedy","tragic","poison","suicide","kill","doom","end badly"]],show:"“Young lovers die tragically.”"},
-{id:"say6",c:"say",d:3,t:"say",q:"Kindly tell a friend their essay needs to be shorter. Don't use the words “too”, “long” or “bad”.",max:8,k:[["short","shorten","trim","cut","tighten","concise","condense","brief","length","word count","words","edit","tighter","punchier","leaner","less"]],ban:["too","long","bad"],show:"“Great ideas. Could you trim it a little?”"},
 
 /* Chain Reaction */
 {id:"chain1",c:"chain",d:1,t:"steps",start:"SUN",s:[{q:"SUN + ___ : a tall yellow bloom",a:["flower"]},{q:"FLOWER + ___ : what you grow it in",a:["pot","bed"]},{q:"POT + ___ : a shared meal where everyone brings a dish",a:["luck"]}],note:"If you said FLOWERBED, the last clue still wants POTLUCK."},
@@ -606,7 +598,7 @@ const LAUNCH=Math.floor(Date.UTC(2026,10,18)/864e5);
 function dayPicks(D){
   const perm=shuffle(CAT_ORDER,777), out=[];
   for(let i=0;i<7;i++){
-    const idx=D*7+i, c=perm[idx%15], k=Math.floor(idx/15);
+    const N=CAT_ORDER.length, idx=D*7+i, c=perm[idx%N], k=Math.floor(idx/N);
     const all=P.filter(p=>p.c===c), hard=all.filter(p=>p.d===3), rest=all.filter(p=>p.d<3);
     let pool=(i===6&&hard.length)?hard:(rest.length?rest:all);
     pool=shuffle(pool,hash(c)+(i===6?99:0));
