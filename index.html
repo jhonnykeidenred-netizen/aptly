@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<meta name="description" content="Aptly: a daily brain game. Seven puzzles a day, the same for everyone. Find the answer that fits perfectly.">
+<meta name="description" content="Aptly: a daily brain game. Seven puzzles, one guess, 30 seconds each. Find the answer that fits perfectly.">
 <style>:root{padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}body{margin:0}img{max-width:100%}[hidden]{display:none!important}</style>
 </head>
 <body>
@@ -13,12 +13,14 @@
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,400..800&family=Atkinson+Hyperlegible:wght@400;700&display=swap">
 <style>
-/* Layout: one narrow column — wordmark + score bar, a 1–7 round track, then a cream "puzzle slip" card on deep navy. */
+/* Layout: one narrow column in a tailor's fitting room — stitched seam under the header, a measuring-tape timer, cream fabric-swatch puzzle cards and clothing-label tags for the fit tiers. */
 :root{
   --navy:#0d1830; --navy-2:#15244a; --navy-3:#20335f; --line:rgba(245,238,220,.16);
   --cream:#f5eedc; --cream-2:#e8dec4; --paper:#fffaf0; --ink:#13203d; --ink-soft:#4a5674;
   --muted:rgba(245,238,220,.66);
   --green:#2ee27e; --green-deep:#0c6b39; --gold:#f5c445; --warm:#ff9d57; --rose:#f39191;
+  --tape:#f2d36b;
+  --t-nofit:#2a3c68; --t-compatible:#cdb497; --t-fit:#ff9d57; --t-suited:#86c9ea; --t-tailored:#2ee27e; --t-aptly:#f5c445;
   --display:"Bricolage Grotesque", "Avenir Next", "Segoe UI", system-ui, sans-serif;
   --body:"Atkinson Hyperlegible", "Segoe UI", system-ui, -apple-system, sans-serif;
   color-scheme:dark;
@@ -27,18 +29,25 @@
 [hidden]{display:none!important}
 html,body{background:var(--navy)}
 body{
-  color:var(--cream); font-family:var(--body); font-size:16px; line-height:1.5;
+  color:var(--cream); font-family:var(--body); font-size:16px; line-height:1.5; min-height:100%;
   padding-left:max(16px, env(safe-area-inset-left, 0px)); padding-right:max(16px, env(safe-area-inset-right, 0px));
-  background:radial-gradient(120% 60% at 50% -10%, var(--navy-3) 0%, var(--navy) 60%) fixed, var(--navy);
-  min-height:100%;
+  background:
+    repeating-linear-gradient(45deg, rgba(255,255,255,.018) 0 2px, transparent 2px 7px),
+    repeating-linear-gradient(-45deg, rgba(255,255,255,.012) 0 2px, transparent 2px 7px),
+    radial-gradient(120% 60% at 50% -10%, var(--navy-3) 0%, var(--navy) 60%) fixed, var(--navy);
 }
 .app{max-width:620px; margin:0 auto; padding-block:18px 40px; display:flex; flex-direction:column; gap:18px}
 button{font:inherit; cursor:pointer}
 :focus-visible{outline:3px solid var(--green); outline-offset:2px}
 .sr{position:absolute; width:1px; height:1px; overflow:hidden; clip:rect(0 0 0 0); white-space:nowrap}
 
+/* Measuring-tape texture, shared by the timer, the ladder and the APTLY snap */
+.ticks{background-color:var(--tape);
+  background-image:repeating-linear-gradient(90deg, var(--ink) 0 2px, transparent 2px 40px), repeating-linear-gradient(90deg, rgba(19,32,61,.6) 0 1px, transparent 1px 8px);
+  background-size:100% 58%, 100% 30%; background-repeat:no-repeat; background-position:0 0, 0 0}
+
 /* Top bar */
-.top{display:flex; align-items:center; justify-content:space-between; gap:12px; flex-wrap:wrap}
+.top{display:flex; align-items:center; justify-content:space-between; gap:12px; flex-wrap:wrap; padding-bottom:14px; border-bottom:2px dashed var(--line)}
 .mark{font-family:var(--display); font-weight:800; font-size:34px; letter-spacing:-.045em; line-height:1; color:var(--cream)}
 .mark span{color:var(--green)}
 .score{display:flex; align-items:baseline; gap:8px; padding:8px 14px; border:1px solid var(--line); border-radius:999px; background:var(--navy-2)}
@@ -47,16 +56,47 @@ button{font:inherit; cursor:pointer}
 .score.gold b{color:var(--gold)}
 .score i{font-style:normal; color:var(--muted); font-variant-numeric:tabular-nums}
 
-/* Round track */
+/* Round track, coloured by tier */
 .track{display:grid; grid-template-columns:repeat(7,1fr); gap:6px}
 .pip{display:flex; flex-direction:column; align-items:center; gap:4px}
 .pip b{width:100%; max-width:52px; aspect-ratio:1; display:grid; place-items:center; border-radius:50%;
-  border:2px solid var(--line); font-family:var(--display); font-weight:700; font-size:15px; color:var(--muted); background:transparent; transition:all .25s}
+  border:2px dashed var(--line); font-family:var(--display); font-weight:700; font-size:15px; color:var(--muted); transition:all .25s}
 .pip span{font-size:11px; color:var(--muted); font-variant-numeric:tabular-nums; min-height:16px}
-.pip.cur b{border-color:var(--cream); color:var(--cream); box-shadow:0 0 0 4px rgba(245,238,220,.1)}
-.pip.full b{background:var(--green); border-color:var(--green); color:var(--ink)}
-.pip.part b{background:var(--warm); border-color:var(--warm); color:var(--ink)}
-.pip.zero b{background:var(--navy-3); border-color:var(--navy-3); color:var(--muted)}
+.pip.cur b{border:2px solid var(--cream); color:var(--cream); box-shadow:0 0 0 4px rgba(245,238,220,.1)}
+.pip[class*="t-"] b{border-style:solid; color:var(--ink)}
+.pip.t-nofit b{background:var(--t-nofit); border-color:var(--t-nofit); color:var(--muted)}
+.pip.t-compatible b{background:var(--t-compatible); border-color:var(--t-compatible)}
+.pip.t-fit b{background:var(--t-fit); border-color:var(--t-fit)}
+.pip.t-suited b{background:var(--t-suited); border-color:var(--t-suited)}
+.pip.t-tailored b{background:var(--t-tailored); border-color:var(--t-tailored)}
+.pip.t-aptly b{background:var(--ink); border-color:var(--gold); color:var(--gold); box-shadow:0 0 0 3px rgba(245,196,69,.25)}
+
+/* Clothing-label tags: the tier word "sewn on" */
+.tag{--tc:var(--t-fit); position:relative; display:inline-flex; align-items:center; padding:10px 18px 10px 32px; background:var(--tc); color:var(--ink);
+  font-family:var(--display); font-weight:800; letter-spacing:.06em; text-transform:uppercase; font-size:15px; line-height:1; border-radius:4px 12px 12px 4px; white-space:nowrap}
+.tag::before{content:""; position:absolute; left:11px; top:50%; width:9px; height:9px; margin-top:-4.5px; border-radius:50%; background:var(--navy); box-shadow:0 0 0 2px rgba(19,32,61,.35)}
+.tag::after{content:""; position:absolute; inset:4px 5px 4px 24px; border:1.5px dashed rgba(19,32,61,.5); border-radius:2px 9px 9px 2px; pointer-events:none}
+.tag.sm{font-size:11px; padding:7px 11px 7px 23px}
+.tag.sm::before{left:8px; width:7px; height:7px; margin-top:-3.5px}
+.tag.sm::after{inset:3px 4px 3px 17px}
+.tag.t-nofit{--tc:var(--t-nofit); color:var(--muted)} .tag.t-nofit::after{border-color:rgba(245,238,220,.3)}
+.tag.t-compatible{--tc:var(--t-compatible)} .tag.t-fit{--tc:var(--t-fit)} .tag.t-suited{--tc:var(--t-suited)} .tag.t-tailored{--tc:var(--t-tailored)}
+.tag.t-aptly{--tc:var(--ink); color:var(--gold); box-shadow:0 0 0 2px var(--gold)}
+.tag.t-aptly::after{border-color:var(--gold)} .tag.t-aptly::before{background:var(--gold); box-shadow:none}
+
+/* Tier entrances: each one fits a little better than the last */
+.a-nofit{animation:droop .7s ease-out both}
+.a-compatible{transform-origin:15px 50%; animation:swing 1.2s ease-out both}
+.a-fit{animation:slidein .45s ease-out both}
+.a-suited{animation:slidein .45s ease-out both} .a-suited::after{animation:sew .7s .35s both}
+.a-tailored{animation:slidein .45s ease-out both} .a-tailored::after{animation:sew .7s .3s both} .a-tailored::before{animation:pinpop .45s 1s both}
+.a-aptly{animation:stamp .55s cubic-bezier(.2,1.6,.4,1) both} .a-aptly::after{animation:sew .8s .35s both}
+@keyframes droop{0%{transform:translateY(-14px); opacity:0} 60%{transform:translateY(4px) rotate(-9deg); opacity:1} 100%{transform:translateY(3px) rotate(-6deg)}}
+@keyframes swing{0%{transform:rotate(20deg); opacity:0} 30%{transform:rotate(-11deg); opacity:1} 55%{transform:rotate(6deg)} 78%{transform:rotate(-4deg)} 100%{transform:rotate(-2.5deg)}}
+@keyframes slidein{from{transform:translateX(-24px); opacity:0} to{transform:none; opacity:1}}
+@keyframes sew{from{clip-path:inset(0 100% 0 0)} to{clip-path:inset(0 0 0 0)}}
+@keyframes pinpop{0%{transform:scale(1)} 50%{transform:scale(1.8); background:var(--gold)} 100%{transform:scale(1)}}
+@keyframes stamp{0%{transform:scale(.3) rotate(-8deg); opacity:0} 100%{transform:scale(1) rotate(-2deg); opacity:1}}
 
 /* Shared pieces */
 .eyebrow{margin:0; font-size:12px; letter-spacing:.14em; text-transform:uppercase; color:var(--muted)}
@@ -66,17 +106,26 @@ button{font:inherit; cursor:pointer}
 .btn.wide{width:100%}
 .ghost{background:none; border:0; color:var(--muted); text-decoration:underline; text-underline-offset:3px; padding:8px 4px; font-size:14px}
 .ghost.warn{color:var(--warm)}
+h3.sec{margin:6px 0 0; font-family:var(--display); font-weight:750; font-size:22px; letter-spacing:-.02em}
 
 /* Intro */
-.intro{display:flex; flex-direction:column; gap:18px; padding-top:6px}
+.intro{display:flex; flex-direction:column; gap:18px; padding-top:4px}
 .hero{font-family:var(--display); font-weight:750; font-size:clamp(34px, 9vw, 54px); line-height:1.02; letter-spacing:-.035em; margin:0; text-wrap:balance}
-.hero em{font-style:normal; color:var(--green)}
+.hero em{font-style:normal; color:var(--gold)}
 .lede{margin:0; color:var(--muted); max-width:52ch}
 .lineup{list-style:none; margin:0; padding:0; display:grid; gap:6px}
-.lineup li{display:flex; align-items:center; gap:12px; padding:10px 14px; border-radius:12px; background:var(--navy-2); border:1px solid var(--line)}
+.lineup li{display:flex; align-items:center; gap:12px; padding:10px 14px; border-radius:12px; background:var(--navy-2); border:1px dashed var(--line)}
 .lineup .n{font-family:var(--display); font-weight:700; color:var(--muted); width:18px; font-variant-numeric:tabular-nums}
 .lineup .nm{font-weight:700; flex:1; min-width:0}
-.lineup .d{color:var(--muted); letter-spacing:2px; font-size:12px}
+.lineup .d{color:var(--gold); letter-spacing:2px; font-size:12px}
+.tiers{list-style:none; margin:0; padding:4px 0 4px 40px; position:relative; display:grid; gap:12px}
+.tiers::before{content:""; position:absolute; left:0; top:0; bottom:0; width:24px; border-radius:4px; background-color:var(--tape);
+  background-image:repeating-linear-gradient(180deg, var(--ink) 0 2px, transparent 2px 40px), repeating-linear-gradient(180deg, rgba(19,32,61,.6) 0 1px, transparent 1px 8px);
+  background-size:58% 100%, 30% 100%; background-repeat:no-repeat}
+.tier-row{display:grid; grid-template-columns:150px minmax(0,1fr); gap:2px 12px; align-items:center}
+.tier-row .tag{justify-self:start}
+.tier-row .rng{font-family:var(--display); font-weight:700; font-variant-numeric:tabular-nums}
+.tier-row .bl{display:block; color:var(--muted); font-size:14px; font-family:var(--body); font-weight:400}
 .rules{display:grid; grid-template-columns:repeat(3,1fr); gap:8px}
 .rules div{padding:12px; border-radius:12px; border:1px dashed var(--line); font-size:13px; color:var(--muted)}
 .rules b{display:block; font-family:var(--display); font-size:20px; color:var(--cream)}
@@ -89,8 +138,23 @@ button{font:inherit; cursor:pointer}
 .diff{color:var(--gold); letter-spacing:2px; font-size:12px}
 .cat{font-family:var(--display); font-weight:750; font-size:clamp(28px, 7vw, 38px); letter-spacing:-.03em; line-height:1.05; margin:0}
 .how{margin:0; color:var(--muted)}
+
+/* Tape-measure timer: the tape reels back into its case */
+.timer{display:flex; align-items:center; gap:10px}
+.case{flex:none; width:44px; height:44px; border-radius:12px; background:var(--navy-3); border:2px solid var(--line); display:grid; place-items:center; position:relative; z-index:1}
+.hub{width:16px; height:16px; border-radius:50%; border:3px solid var(--cream); border-top-color:transparent; animation:spin 1.4s linear infinite}
+.tape-track{flex:1; position:relative; height:24px; margin-left:-14px}
+.tape{position:absolute; left:0; top:0; bottom:0; width:100%; overflow:hidden; border-radius:0 3px 3px 0}
+.strip{position:absolute; right:0; top:0; bottom:0; width:600px}
+.hook{position:absolute; right:0; top:0; bottom:0; width:6px; background:#a9b1c3}
+.secs{flex:none; width:46px; text-align:right; font-family:var(--display); font-weight:800; font-size:24px; font-variant-numeric:tabular-nums}
+.timer.low{--tape:#f7b267} .timer.low .secs{color:var(--warm)}
+.timer.crit{--tape:#f39191} .timer.crit .secs{color:var(--rose); animation:pulse .8s ease-in-out infinite}
+@keyframes spin{to{transform:rotate(360deg)}}
+@keyframes pulse{50%{transform:scale(1.15)}}
+
 .card{background:var(--cream); color:var(--ink); border-radius:20px; padding:22px; display:flex; flex-direction:column; gap:16px;
-  box-shadow:0 1px 0 rgba(255,255,255,.4) inset, 0 18px 40px -18px rgba(0,0,0,.6)}
+  outline:2px dashed rgba(19,32,61,.22); outline-offset:-9px; box-shadow:0 18px 40px -18px rgba(0,0,0,.6)}
 .q{margin:0; font-family:var(--display); font-weight:600; font-size:clamp(20px, 5vw, 25px); line-height:1.25; letter-spacing:-.015em; text-wrap:balance}
 .q.seq{font-size:clamp(22px, 6.5vw, 32px); letter-spacing:.02em; font-variant-numeric:tabular-nums}
 .q .blank{display:inline-block; min-width:2.6em; border-bottom:3px solid var(--ink); color:transparent}
@@ -100,7 +164,8 @@ button{font:inherit; cursor:pointer}
 .steps-flow .s{padding:6px 10px; border-radius:8px; font-family:var(--display); font-weight:700; letter-spacing:.06em; text-transform:uppercase; font-size:14px; background:var(--cream-2); color:var(--ink-soft)}
 .steps-flow .s.on{background:var(--ink); color:var(--cream)}
 .steps-flow .s.got{background:var(--green-deep); color:var(--paper)}
-.steps-flow .s.miss{background:var(--ink-soft); color:var(--paper)}
+.steps-flow .s.half{background:#b4651f; color:var(--paper)}
+.steps-flow .s.miss{background:var(--ink-soft); color:var(--paper); text-decoration:line-through}
 .steps-flow .ar{color:var(--ink-soft)}
 .stage{font-size:12px; letter-spacing:.12em; text-transform:uppercase; color:var(--ink-soft); margin:0}
 .ansrow{display:flex; gap:8px}
@@ -110,12 +175,14 @@ button{font:inherit; cursor:pointer}
 .ansrow .btn{flex:none; background:var(--ink); color:var(--cream)}
 .ansrow.col{flex-direction:column}
 .tries{margin:0; font-size:13px; color:var(--ink-soft); display:flex; justify-content:space-between; gap:8px; flex-wrap:wrap}
+.hint{margin:0; font-size:14px; font-weight:700; color:#a2440c; min-height:0}
+.hint:empty{display:none}
 .opts{display:grid; grid-template-columns:repeat(2, minmax(0,1fr)); gap:8px}
 .opts.long{grid-template-columns:1fr}
 .opt{text-align:left; padding:13px 14px; border-radius:12px; border:2px solid transparent; background:var(--cream-2); color:var(--ink); font-weight:700; font-size:16px; line-height:1.3}
 .opt:hover:not(:disabled){border-color:var(--ink)}
 .opt:disabled{cursor:default}
-.opt.wrong{border-color:var(--rose); color:var(--ink-soft); text-decoration:line-through; opacity:.7}
+.opt.wrong{border-color:#c4473f; color:var(--ink-soft); text-decoration:line-through}
 .opt.right{background:var(--green); border-color:var(--green-deep)}
 .opt.chosen{border-color:var(--ink)}
 .opt .pts{display:block; font-weight:400; font-size:13px; margin-top:4px; text-decoration:none}
@@ -124,41 +191,45 @@ button{font:inherit; cursor:pointer}
 .ladder .ar{color:var(--ink-soft); font-size:14px; line-height:1}
 .rung-in{width:min(220px, 100%); text-align:center; font-family:var(--display); font-weight:800; font-size:26px; letter-spacing:.3em; text-transform:uppercase;
   color:var(--ink); background:var(--paper); border:2px dashed var(--ink); border-radius:10px; padding:6px 10px}
-.guesses{list-style:none; margin:0; padding:0; display:grid; gap:6px}
-.guesses li{display:flex; justify-content:space-between; gap:10px; padding:8px 12px; border-radius:10px; background:var(--cream-2); font-variant-numeric:tabular-nums}
-.heat{font-weight:700}
-.heat.hot{color:#b4430a} .heat.warm{color:#9a6a00} .heat.cool{color:#3f5f8f} .heat.cold{color:#3a4a6a} .heat.hit{color:var(--green-deep)}
 .wc{font-variant-numeric:tabular-nums}
 .wc.over{color:#b4430a; font-weight:700}
+.actions{display:flex; justify-content:flex-end}
 
-.fb{margin:0; min-height:1.5em; font-weight:700; font-size:17px}
-.fb.ok{color:var(--green)} .fb.near{color:var(--warm)} .fb.no{color:var(--rose)}
-.actions{display:flex; justify-content:space-between; align-items:center; gap:10px; flex-wrap:wrap}
-.reveal{padding:18px; border-radius:16px; background:var(--navy-2); border:1px solid var(--line); display:flex; flex-direction:column; gap:10px}
-.reveal .ans{margin:0; font-family:var(--display); font-weight:700; font-size:21px; line-height:1.25}
-.reveal .ex{margin:0; color:var(--muted)}
-.reveal .row{display:flex; align-items:center; justify-content:space-between; gap:12px; flex-wrap:wrap}
-.badge{display:inline-flex; align-items:baseline; gap:4px; padding:5px 12px; border-radius:999px; font-family:var(--display); font-weight:800; font-size:18px; background:var(--navy-3); color:var(--cream); font-variant-numeric:tabular-nums}
-.badge.full{background:var(--green); color:var(--ink)} .badge.part{background:var(--warm); color:var(--ink)}
+/* Result */
+.reveal{padding:18px; border-radius:16px; background:var(--navy-2); border:1px solid var(--line); display:flex; flex-direction:column; gap:12px}
+.verdict{display:flex; align-items:center; justify-content:space-between; gap:12px; flex-wrap:wrap}
+.verdict .pts{font-family:var(--display); font-weight:800; font-size:28px; font-variant-numeric:tabular-nums}
+.vline{margin:0; font-weight:700}
+.vline .time{font-weight:400; color:var(--muted)}
+.given{margin:0; color:var(--muted)} .given b{color:var(--cream)}
+.slip{border-top:2px dashed var(--line); padding-top:12px; display:flex; flex-direction:column; gap:8px}
+.slip .ans{margin:0; font-family:var(--display); font-weight:700; font-size:21px; line-height:1.25}
+.slip .ex{margin:0; color:var(--muted)}
 .grades{list-style:none; margin:0; padding:0; display:grid; gap:6px; font-size:14px}
 .grades li{display:grid; grid-template-columns:44px 1fr; gap:8px; color:var(--muted)}
 .grades b{color:var(--cream); font-variant-numeric:tabular-nums}
+.grades strong{color:var(--cream)}
 
 /* Results */
-.results{display:flex; flex-direction:column; gap:18px; align-items:stretch}
-.final{text-align:center; padding:26px 18px; border-radius:22px; background:var(--cream); color:var(--ink); display:flex; flex-direction:column; gap:6px; align-items:center}
+.results{display:flex; flex-direction:column; gap:18px}
+.final{text-align:center; padding:26px 18px; border-radius:22px; background:var(--cream); color:var(--ink); display:flex; flex-direction:column; gap:6px; align-items:center;
+  outline:2px dashed rgba(19,32,61,.25); outline-offset:-10px}
 .final .eyebrow{color:var(--ink-soft)}
 .big{font-family:var(--display); font-weight:800; font-size:clamp(64px, 20vw, 104px); line-height:.95; letter-spacing:-.05em; font-variant-numeric:tabular-nums}
 .big small{font-size:.32em; letter-spacing:0; color:var(--ink-soft); font-weight:600}
 .final.gold{background:linear-gradient(160deg, #fff3cf, var(--gold))}
 .rating{margin:4px 0 0; font-family:var(--display); font-weight:750; font-size:28px; letter-spacing:-.02em}
 .final .note{margin:0; font-size:13px; color:var(--ink-soft)}
+.tiercount{display:grid; grid-template-columns:repeat(3, minmax(0,1fr)); gap:8px}
+.tiercount div{display:flex; align-items:center; justify-content:space-between; gap:8px; padding:10px 12px; border-radius:12px; background:var(--navy-2); border:1px solid var(--line)}
+.tiercount b{font-family:var(--display); font-size:22px; font-variant-numeric:tabular-nums}
+.tiercount .zero{opacity:.5}
 .breakdown{list-style:none; margin:0; padding:0; display:grid; gap:6px}
-.breakdown li{display:grid; grid-template-columns:28px minmax(0,1fr) auto; gap:10px; align-items:center; padding:10px 12px; border-radius:12px; background:var(--navy-2); border:1px solid var(--line)}
+.breakdown li{display:grid; grid-template-columns:24px minmax(0,1fr) auto; gap:10px; align-items:center; padding:10px 12px; border-radius:12px; background:var(--navy-2); border:1px solid var(--line)}
 .breakdown .n{font-family:var(--display); font-weight:700; color:var(--muted)}
-.breakdown .what{min-width:0}
 .breakdown .what b{display:block}
 .breakdown .what span{display:block; color:var(--muted); font-size:13px; overflow-wrap:anywhere}
+.breakdown .sc{display:flex; flex-direction:column; align-items:flex-end; gap:4px; font-family:var(--display); font-weight:800; font-variant-numeric:tabular-nums}
 .stats{display:grid; grid-template-columns:repeat(3,1fr); gap:8px; text-align:center}
 .stats div{padding:12px 6px; border-radius:12px; background:var(--navy-2); border:1px solid var(--line); font-size:12px; color:var(--muted); letter-spacing:.06em; text-transform:uppercase}
 .stats b{display:block; font-family:var(--display); font-size:26px; color:var(--cream); letter-spacing:0; font-variant-numeric:tabular-nums}
@@ -169,24 +240,26 @@ button{font:inherit; cursor:pointer}
 .next b{color:var(--cream); font-variant-numeric:tabular-nums; font-family:var(--display)}
 footer{color:var(--muted); font-size:12px; text-align:center}
 
-/* APTLY! pop */
-.pop{position:fixed; inset:0; z-index:50; display:grid; place-items:center; background:rgba(13,24,48,.72); backdrop-filter:blur(3px); -webkit-backdrop-filter:blur(3px);
+/* APTLY! moment: a tape measure snaps into place, gold stitching runs along it */
+.pop{position:fixed; inset:0; z-index:50; display:grid; place-items:center; background:rgba(13,24,48,.8); backdrop-filter:blur(3px); -webkit-backdrop-filter:blur(3px);
   padding:env(safe-area-inset-top,0px) max(16px, env(safe-area-inset-right,0px)) env(safe-area-inset-bottom,0px) max(16px, env(safe-area-inset-left,0px)); cursor:pointer}
-.pop-in{position:relative; display:flex; flex-direction:column; align-items:center; gap:8px; text-align:center}
-.pop-word{font-family:var(--display); font-weight:800; font-size:clamp(64px, 19vw, 132px); letter-spacing:-.05em; line-height:1; color:var(--green); text-shadow:0 6px 0 var(--green-deep)}
+.pop-in{display:flex; flex-direction:column; align-items:center; gap:14px; text-align:center; width:min(540px, 100%)}
+.snap{position:relative; width:100%; height:34px}
+.snap-tape{position:absolute; inset:0; border-radius:4px; transform-origin:left center}
+.snap-tape::after{content:""; position:absolute; right:-4px; top:-5px; bottom:-5px; width:8px; border-radius:2px; background:#a9b1c3}
+.snap-stitch{position:absolute; left:0; right:0; bottom:-12px; border-top:3px dashed var(--gold)}
+.pop-word{font-family:var(--display); font-weight:800; font-size:clamp(64px, 19vw, 132px); letter-spacing:-.05em; line-height:1; color:var(--gold); text-shadow:0 6px 0 #8a6510}
 .pop-sub{font-size:20px; font-weight:700; color:var(--cream)}
 .pop-sub b{color:var(--gold)}
-.ray{position:absolute; left:50%; top:42%; width:6px; height:26px; margin:-13px 0 0 -3px; border-radius:3px; background:var(--gold); opacity:0}
-.pop.go .pop-word{animation:stamp .55s cubic-bezier(.2,1.6,.4,1) both}
-.pop.go .pop-sub{animation:rise .5s .25s ease-out both}
-.pop.go .ray{animation:burst .7s .12s ease-out both}
-@keyframes stamp{0%{transform:scale(.3) rotate(-8deg); opacity:0} 100%{transform:scale(1) rotate(-3deg); opacity:1}}
-@keyframes rise{from{transform:translateY(10px); opacity:0} to{transform:none; opacity:1}}
-@keyframes burst{0%{opacity:1; transform:rotate(var(--a)) translateY(0) scaleY(.4)} 100%{opacity:0; transform:rotate(var(--a)) translateY(-150px) scaleY(1)}}
-@keyframes shake{20%,60%{transform:translateX(-5px)} 40%,80%{transform:translateX(5px)}}
-.shake{animation:shake .35s}
-@media (prefers-reduced-motion: reduce){ .pop.go .pop-word,.pop.go .pop-sub,.pop.go .ray,.shake{animation:none!important} .pop-word{transform:rotate(-3deg)} }
+.pop.go .snap-tape{animation:snap .55s cubic-bezier(.3,1.45,.5,1) both}
+.pop.go .snap-stitch{animation:sew .6s .45s both}
+.pop.go .pop-word{animation:stamp .5s .25s cubic-bezier(.2,1.6,.4,1) both}
+.pop.go .pop-sub{animation:slidein .4s .6s ease-out both}
+@keyframes snap{0%{transform:scaleX(0)} 100%{transform:scaleX(1)}}
 
+@media (prefers-reduced-motion: reduce){
+  *,*::before,*::after{animation:none!important; transition:none!important}
+}
 @media (max-width:460px){
   .card{padding:18px}
   .opts{grid-template-columns:1fr}
@@ -196,6 +269,8 @@ footer{color:var(--muted); font-size:12px; text-align:center}
   .ansrow:not(.col){flex-direction:column}
   .mark{font-size:30px}
   .pip span{font-size:10px}
+  .tier-row{grid-template-columns:128px minmax(0,1fr)}
+  .tiercount{grid-template-columns:repeat(2, minmax(0,1fr))}
 }
 </style>
 
@@ -534,12 +609,33 @@ function dayPicks(D){
   return [...first,out[6]].map(p=>p.id);
 }
 
+/* ---------------- Rules: one guess, 30 seconds, fit tiers ---------------- */
+CATS.odd.h="Tap the one that doesn't belong. One tap, no take-backs.";
+CATS.closest.h="One guess. The closer you land, the better it fits.";
+CATS.tool.h="Pick the most effective tool for the job. One pick.";
+CATS.chain.h="Each answer joins onto the word before it. One guess per link.";
+CATS.smaller.h="Answer, then answer again as the rule gets tighter. One guess per rule.";
+
+const LIMIT=30;
+const TIERS=[
+  {k:"aptly",     n:"APTLY!",      min:95, max:100, b:"A perfect fit, made in moments."},
+  {k:"tailored",  n:"Tailored",    min:80, max:94,  b:"Measured, cut and stitched."},
+  {k:"suited",    n:"Suited",      min:60, max:79,  b:"Smart. Looks made for it."},
+  {k:"fit",       n:"Fit",         min:30, max:59,  b:"Off the rack, and it works."},
+  {k:"compatible",n:"Compatible",  min:1,  max:29,  b:"It goes on. Just about."},
+  {k:"nofit",     n:"Doesn't Fit", min:0,  max:0,   b:"Back to the cutting table."}
+];
+const tierOf=s=>TIERS.find(t=>s>=t.min);
+/* Correct: 60 + up to 40 for speed. Six seconds or less keeps the full 40; APTLY! needs about nine seconds or less. */
+function speedScore(e){ return 60+(e<=6?40:Math.max(0,Math.round(40*(LIMIT-e)/(LIMIT-6)))); }
+/* Close or partial: 15 to 45, also a little better when faster. */
+function nearScore(e){ return Math.round(15+30*Math.max(0,LIMIT-e)/LIMIT); }
+
 /* ---------------- State ---------------- */
-const KEY="aptly.v1.day", SKEY="aptly.v1.streak";
+const KEY="aptly.v2.day", SKEY="aptly.v1.streak";
 const store={get(k){try{return JSON.parse(localStorage.getItem(k))}catch(e){return null}}, set(k,v){try{localStorage.setItem(k,JSON.stringify(v))}catch(e){}}};
-const TEXT_PTS=[100,70,45,25], CHOICE_PTS=[100,50,20], NUM_PTS=[100,85,70,55,40,25], STEP_MULT=[1,.6,.3];
-let S, TODAY, giveUpArmed=false;
-function freshRound(){return {done:false,score:0,how:"",tries:0,picked:[],guesses:[],step:0,stepPts:[],stepTries:0,fb:null};}
+let S, TODAY, giveUpArmed=false, animateTag=false, raf=0;
+function freshRound(){return {done:false,score:0,how:"",e:0,given:"",msg:"",picked:null,step:0,stepRes:[],stepGiven:[],t0:0};}
 function init(){
   TODAY=dayInfo();
   const saved=store.get(KEY);
@@ -567,6 +663,8 @@ const $=s=>document.querySelector(s);
 const esc=s=>String(s).replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
 const fmt=n=>Number(n).toLocaleString("en-US");
 const cap=s=>s.charAt(0).toUpperCase()+s.slice(1);
+const dots=d=>"●".repeat(d)+"○".repeat(3-d);
+const tagHTML=(t,extra="")=>`<span class="tag t-${t.k} ${extra}">${t.n}</span>`;
 function rating(t){
   if(t>=700) return "Perfectly Aptly";
   if(t>=640) return "Mastermind";
@@ -576,7 +674,7 @@ function rating(t){
   if(t>=150) return "Curious Mind";
   return "Warming Up";
 }
-const markOf=r=>!r.done?"":r.score>=100?"full":r.score>0?"part":"zero";
+const elapsed=()=>(Date.now()-S.r[S.cur].t0)/1000;
 
 /* ---------------- Header + track ---------------- */
 function renderChrome(){
@@ -584,9 +682,13 @@ function renderChrome(){
   $("#total").textContent=t;
   $("#scorebox").classList.toggle("gold",t>=550);
   const onRound=S.started&&!allDone();
-  $("#track").innerHTML=S.r.map((r,i)=>`<div class="pip ${markOf(r)} ${onRound&&i===S.cur&&!r.done?"cur":""}"><b aria-label="Round ${i+1}${r.done?`, ${r.score} points`:""}">${i+1}</b><span>${r.done?r.score:""}</span></div>`).join("");
+  $("#track").innerHTML=S.r.map((r,i)=>{
+    const tr=r.done?tierOf(r.score):null;
+    return `<div class="pip ${tr?"t-"+tr.k:""} ${onRound&&i===S.cur&&!r.done?"cur":""}"><b aria-label="Round ${i+1}${tr?`, ${tr.n}, ${r.score} points`:""}">${i+1}</b><span>${r.done?r.score:""}</span></div>`;
+  }).join("");
 }
 function render(){
+  cancelAnimationFrame(raf);
   renderChrome();
   if(allDone()) return renderResults();
   if(!S.started) return renderIntro();
@@ -601,224 +703,239 @@ function renderIntro(){
   $("#view").innerHTML=`
   <section class="intro">
     <p class="eyebrow">No. ${Math.max(1,S.day-LAUNCH+1)} · ${esc(dateStr)}</p>
-    <h1 class="hero">Seven puzzles.<br>Find the <em>apt</em> answer.</h1>
-    <p class="lede">Today's lineup gets harder as you go. Synonyms, plurals and small typos all count, so just say what you mean.</p>
-    <ol class="lineup">${S.picks.map((id,i)=>{const p=BY_ID[id];return `<li><span class="n">${i+1}</span><span class="nm">${CATS[p.c].n}</span><span class="d" aria-label="Difficulty ${p.d} of 3">${"●".repeat(p.d)}${"○".repeat(3-p.d)}</span></li>`}).join("")}</ol>
-    <div class="rules"><div><b>100</b> points a round, most on your first try</div><div><b>700</b> points is a perfect day</div><div><b>0</b> points if you reveal the answer</div></div>
+    <h1 class="hero">Seven puzzles. One guess each. <em>Thirty seconds.</em></h1>
+    <p class="lede">The tape starts running the moment a puzzle appears. A right answer always fits; a fast right answer fits perfectly. Synonyms, plurals and small typos all count.</p>
+    <div class="rules"><div><b>1</b> guess per puzzle</div><div><b>30s</b> on the tape</div><div><b>700</b> is a perfect day</div></div>
+    <h3 class="sec">The fit ladder</h3>
+    <ol class="tiers">${TIERS.map(t=>`<li class="tier-row">${tagHTML(t)}<span class="rng">${t.min===t.max?t.min:`${t.min}–${t.max}`} pts<span class="bl">${esc(t.b)}</span></span></li>`).join("")}</ol>
+    <h3 class="sec">Today's fitting</h3>
+    <ol class="lineup">${S.picks.map((id,i)=>{const p=BY_ID[id];return `<li><span class="n">${i+1}</span><span class="nm">${CATS[p.c].n}</span><span class="d" aria-label="Difficulty ${p.d} of 3">${dots(p.d)}</span></li>`}).join("")}</ol>
     <button class="btn wide" id="start">${resume?`Resume round ${S.cur+1}`:"Start round 1"}</button>
     <p class="streakline">Streak: <b>${st.live}</b> ${st.live===1?"day":"days"}${st.best?` · Best: ${st.best}`:""}</p>
   </section>`;
   $("#start").onclick=()=>{S.started=true;save();render();scrollTo(0,0);};
 }
 
+/* ---------------- Timer ---------------- */
+function timerHTML(){
+  return `<div class="timer" id="timer"><div class="case" aria-hidden="true"><span class="hub"></span></div>
+    <div class="tape-track" id="tt" aria-hidden="true"><div class="tape" id="tape"><div class="strip ticks" id="strip"></div><i class="hook"></i></div></div>
+    <b class="secs" id="secs" role="timer" aria-label="Seconds left">${LIMIT}</b></div>`;
+}
+function sizeTape(){ const t=$("#tt"), s=$("#strip"); if(t&&s) s.style.width=t.clientWidth+"px"; }
+addEventListener("resize",sizeTape);
+function tick(){
+  const r=S&&S.r[S.cur]; if(!r||r.done||!r.t0||!S.started) return;
+  const left=Math.max(0,LIMIT-elapsed());
+  const tp=$("#tape");
+  if(tp){
+    tp.style.width=(left/LIMIT*100)+"%";
+    const n=String(Math.ceil(left)), s=$("#secs"); if(s.textContent!==n) s.textContent=n;
+    const tm=$("#timer"); tm.classList.toggle("low",left<=10&&left>5); tm.classList.toggle("crit",left<=5);
+  }
+  if(left<=0) return finish(0,"timeout");
+  cancelAnimationFrame(raf); raf=requestAnimationFrame(tick);
+}
+
 /* ---------------- Round ---------------- */
 function renderRound(){
+  cancelAnimationFrame(raf);
   const i=S.cur, p=BY_ID[S.picks[i]], r=S.r[i], cat=CATS[p.c];
   giveUpArmed=false;
   $("#view").innerHTML=`
   <section class="round">
-    <div class="meta"><span class="eyebrow">Round ${i+1} of 7</span><span class="diff" aria-label="Difficulty ${p.d} of 3">${"●".repeat(p.d)}${"○".repeat(3-p.d)}</span>${i===6?`<span class="eyebrow" style="color:var(--gold)">Final round</span>`:""}</div>
+    <div class="meta"><span class="eyebrow">Round ${i+1} of 7</span><span class="diff" aria-label="Difficulty ${p.d} of 3">${dots(p.d)}</span>${i===6?`<span class="eyebrow" style="color:var(--gold)">Final round</span>`:""}</div>
     <h2 class="cat">${cat.n}</h2>
     <p class="how">${cat.h}</p>
+    ${r.done?"":timerHTML()}
     <div class="card" id="card"></div>
-    <p class="fb ${r.fb?r.fb.c:""}" id="fb" role="status" aria-live="polite">${r.fb?esc(r.fb.t):""}</p>
     <div class="actions" id="actions"></div>
     <div class="reveal" id="reveal" hidden></div>
   </section>`;
   TYPES[p.t](p,r);
-  if(r.done) showReveal(p,r);
-  else{
-    $("#actions").innerHTML=`<span></span><button class="ghost" id="giveup">Give up and reveal the answer</button>`;
-    $("#giveup").onclick=e=>{
-      if(!giveUpArmed){giveUpArmed=true;e.target.textContent="Tap again to reveal (0 points)";e.target.classList.add("warn");return;}
-      giveUp(p,r);
-    };
-    const inp=$("#ans"); if(inp && matchMedia("(hover:hover)").matches) inp.focus({preventScroll:true});
-  }
+  if(r.done){ showReveal(p,r); return; }
+  if(!r.t0){ r.t0=Date.now(); save(); }
+  $("#actions").innerHTML=`<button class="ghost" id="giveup">Give up and see the answer</button>`;
+  $("#giveup").onclick=e=>{
+    if(!giveUpArmed){giveUpArmed=true;e.target.textContent="Tap again to reveal (0 points)";e.target.classList.add("warn");return;}
+    if(p.t==="steps"){ while(r.stepRes.length<p.s.length){ r.stepRes.push(0); r.stepGiven.push(""); } }
+    finish(0,"given");
+  };
+  sizeTape(); tick();
+  const inp=$("#ans"); if(inp && matchMedia("(hover:hover)").matches) inp.focus({preventScroll:true});
 }
-function setFb(r,c,t){ r.fb={c,t}; }
-function resolve(pts,how){
-  const r=S.r[S.cur]; r.done=true; r.score=Math.max(0,Math.round(pts)); r.how=how; save();
+function finish(pts,how,msg){
+  cancelAnimationFrame(raf);
+  const r=S.r[S.cur]; if(r.done) return;
+  r.done=true; r.score=Math.max(0,Math.min(100,Math.round(pts))); r.how=how; r.e=Math.min(LIMIT,elapsed()); r.msg=msg||"";
+  save();
   if(allDone()) bumpStreak();
-  if(how==="solved"&&r.score>0) pop(r.score);
+  animateTag=true;
+  if(tierOf(r.score).k==="aptly") pop(r.score);
   renderChrome(); renderRound();
 }
-function giveUp(p,r){
-  if(p.t==="steps"){ while(r.stepPts.length<p.s.length) r.stepPts.push(0); r.step=p.s.length; setFb(r,"no","Answer revealed."); return resolve(r.stepPts.reduce((a,b)=>a+b,0),"given"); }
-  setFb(r,"no","Answer revealed. No points this round."); resolve(0,"given");
-}
-function shakeCard(){ const c=$("#card"); if(!c) return; c.classList.remove("shake"); void c.offsetWidth; c.classList.add("shake"); }
+const timeUp=()=>{ if(elapsed()>=LIMIT){ finish(0,"timeout"); return true; } return false; };
+function hint(t){ const h=$("#hint"); if(h) h.textContent=t; }
+
 function answerHTML(p){
   switch(p.t){
     case "choice": return esc(p.o[p.a]);
     case "graded": return esc(p.o.find(o=>o.p===100).x);
     case "num": return `${fmt(p.a)}${p.unit?" "+esc(p.unit):""}`;
     case "ladder": return p.a.map(w=>w.toUpperCase()).join(" or ");
-    case "steps": return p.start? [p.start,...p.s.map(s=>s.a[0].toUpperCase())].join(" → ") : p.s.map(s=>cap(s.a[s.a.length===1?0:0])).join(" → ");
+    case "steps": return p.start? [p.start,...p.s.map(s=>s.a[0].toUpperCase())].join(" → ") : p.s.map(s=>cap(s.a[0])).join(" → ");
     default: return esc(p.show||p.a[0]);
   }
 }
 function showReveal(p,r){
-  const el=$("#reveal"); el.hidden=false;
-  const last=S.cur===6;
+  const t=tierOf(r.score), last=S.cur===6, box=$("#reveal"); box.hidden=false;
+  const line={
+    right: t.b,
+    near: "Close, but not a perfect fit. "+(r.msg||""),
+    wrong: "That one doesn't fit. "+(r.msg||""),
+    timeout: "Out of time. The tape ran out.",
+    given: "Answer revealed."
+  }[r.how]||t.b;
+  const timeTxt=(r.how==="timeout"||r.how==="given")?"":` <span class="time">Answered in ${r.e.toFixed(1)}s.</span>`;
   let extra="";
-  if(p.t==="graded") extra=`<ul class="grades">${p.o.slice().sort((a,b)=>b.p-a.p).map(o=>`<li><b>${o.p}</b><span><strong style="color:var(--cream)">${esc(o.x)}</strong> · ${esc(o.w)}</span></li>`).join("")}</ul>`;
-  if(p.t==="steps" && !p.start) extra=`<ul class="grades">${p.s.map((s,i)=>`<li><b>${r.stepPts[i]??0}</b><span>${esc(s.q)} <strong style="color:var(--cream)">${esc(cap(s.a[0]))}</strong>${s.a.length>1?` (or ${s.a.slice(1).filter(x=>x.length>3).slice(0,4).map(cap).join(", ")||"others"})`:""}</span></li>`).join("")}</ul>`;
+  if(p.t==="graded") extra=`<ul class="grades">${p.o.slice().sort((a,b)=>b.p-a.p).map(o=>`<li><b>${o.p}</b><span><strong>${esc(o.x)}</strong> · ${esc(o.w)}</span></li>`).join("")}</ul>`;
+  if(p.t==="steps") extra=`<ul class="grades">${p.s.map((s,i)=>{const v=r.stepRes[i]; return `<li><b>${v===1?"✓":v===.5?"½":"✗"}</b><span>${esc(s.q)} <strong>${esc(s.a[0].toUpperCase())}</strong>${r.stepGiven[i]&&v!==1?` · you said “${esc(r.stepGiven[i])}”`:""}</span></li>`}).join("")}</ul>`;
   if(p.t==="ladder") extra=`<p class="ex">${p.r.map(w=>w||`<strong style="color:var(--green)">${p.a[0].toUpperCase()}</strong>`).join(" → ")}</p>`;
   let ex=p.ex||"";
   if(p.t==="rubric"&&p.bench) ex=`Our benchmark answer was “${p.bench.t}”.`;
   if(p.note) ex=(ex?ex+" ":"")+p.note;
-  el.innerHTML=`
-    <div class="row"><span class="eyebrow">${p.t==="rubric"||p.t==="say"?"Strong answers":"Answer"}</span><span class="badge ${markOf(r)}">+${r.score}</span></div>
-    ${p.t==="graded"?"":`<p class="ans">${answerHTML(p)}</p>`}
-    ${ex?`<p class="ex">${esc(ex)}</p>`:""}
-    ${extra}
-    <button class="btn ${last?"":"cream"} wide" id="next">${last?"See today's score":"Next round →"}</button>`;
+  box.innerHTML=`
+    <div class="verdict">${tagHTML(t, animateTag?"a-"+t.k:"")}<span class="pts">+${r.score}</span></div>
+    <p class="vline">${esc(line)}${timeTxt}</p>
+    ${r.given?`<p class="given">You said: <b>${esc(r.given)}</b></p>`:""}
+    <div class="slip">
+      <span class="eyebrow">${p.t==="rubric"||p.t==="say"?"Strong answers":p.t==="graded"?"How each choice fits":"The right fit"}</span>
+      ${p.t==="graded"?"":`<p class="ans">${answerHTML(p)}</p>`}
+      ${ex?`<p class="ex">${esc(ex)}</p>`:""}
+      ${extra}
+    </div>
+    <button class="btn ${last?"":"cream"} wide" id="next">${last?"See today's fitting":"Next round →"}</button>`;
+  animateTag=false;
   $("#next").onclick=()=>{ if(!last){S.cur++;save();} render(); scrollTo({top:0,behavior:"smooth"}); };
-  $("#actions").innerHTML="";
 }
-function triesLine(r,max,pts){ return `<p class="tries" id="tries"><span>Attempt ${Math.min(r.tries+1,max)} of ${max}</span><span>Worth ${pts[Math.min(r.tries,pts.length-1)]} points</span></p>`; }
-function formRow(ph,big){
+function formRow(ph,big,btn="Submit"){
   return big
-  ? `<form class="ansrow col" id="f"><label class="sr" for="ans">Your answer</label><textarea id="ans" rows="2" placeholder="${ph}" autocomplete="off" spellcheck="true"></textarea><button class="btn">Check</button></form>`
-  : `<form class="ansrow" id="f"><label class="sr" for="ans">Your answer</label><input id="ans" placeholder="${ph}" autocomplete="off" autocapitalize="off" autocorrect="off" spellcheck="false"><button class="btn">Check</button></form>`;
+  ? `<form class="ansrow col" id="f"><label class="sr" for="ans">Your answer</label><textarea id="ans" rows="2" placeholder="${ph}" autocomplete="off" spellcheck="true"></textarea><button class="btn">${btn}</button></form>`
+  : `<form class="ansrow" id="f"><label class="sr" for="ans">Your answer</label><input id="ans" placeholder="${ph}" autocomplete="off" autocapitalize="off" autocorrect="off" spellcheck="false"><button class="btn">${btn}</button></form>`;
 }
+const oneGuess=(l="One guess")=>`<p class="hint" id="hint"></p><p class="tries"><span>${l}</span><span>Faster answers fit better</span></p>`;
 function wireForm(fn){
   const f=$("#f"); if(!f) return;
-  f.onsubmit=e=>{e.preventDefault(); const v=$("#ans").value; if(!v.trim()) return; fn(v);};
+  f.onsubmit=e=>{e.preventDefault(); const v=$("#ans").value; if(!v.trim()) return; if(timeUp()) return; fn(v);};
   const ta=$("textarea#ans"); if(ta) ta.onkeydown=e=>{ if(e.key==="Enter"&&!e.shiftKey){e.preventDefault(); f.requestSubmit();} };
 }
 function promptHTML(p){
   if(p.clues) return `<div class="clues">${p.clues.map(c=>`<span class="clue">${esc(c)}</span>`).join("")}</div>`;
   return `<p class="q ${p.seq?"seq":""}">${p.q}</p>`;
 }
+function scoreJudge(j,r,v){
+  r.given=v.trim(); const e=elapsed();
+  if(j.k==="ok") return finish(j.p?speedScore(e)*j.p/100:speedScore(e),"right");
+  if(j.k==="near") return finish(nearScore(e),"near",j.m);
+  finish(0,"wrong",j.m);
+}
 
 const TYPES={
   text(p,r){
-    $("#card").innerHTML=promptHTML(p)+(r.done?"":formRow("Type your answer")+triesLine(r,4,TEXT_PTS));
-    wireForm(v=>{
-      const j=judgeText(v,p.a,p.n,p.kw);
-      if(j.k==="ok"){ setFb(r,"ok",`Aptly! +${TEXT_PTS[r.tries]} points`); return resolve(TEXT_PTS[r.tries],"solved"); }
-      if(j.k==="near"){ setFb(r,"near","Almost Aptly! "+j.m); save(); return renderRound(); }
-      r.tries++;
-      if(r.tries>=4){ setFb(r,"no",`Not quite. Out of tries — “${v.trim()}” wasn't it.`); return resolve(0,"failed"); }
-      setFb(r,"no",`Not quite. ${4-r.tries} ${4-r.tries===1?"try":"tries"} left.`); save(); renderRound(); shakeCard();
-    });
+    $("#card").innerHTML=promptHTML(p)+(r.done?"":formRow("Type your answer")+oneGuess());
+    wireForm(v=>scoreJudge(judgeText(v,p.a,p.n,p.kw),r,v));
   },
   choice(p,r){
     $("#card").innerHTML=`<p class="q">${esc(p.q)}</p><div class="opts ${p.o.some(o=>o.length>22)?"long":""}">${p.o.map((o,i)=>{
-      const cls=r.picked.includes(i)?"wrong":(r.done&&i===p.a?"right":"");
-      return `<button class="opt ${cls}" data-i="${i}" ${r.done||r.picked.includes(i)?"disabled":""}>${esc(o)}</button>`;}).join("")}</div>${r.done?"":`<p class="tries"><span>Pick ${r.picked.length+1} of 3</span><span>Worth ${CHOICE_PTS[r.picked.length]} points</span></p>`}`;
-    document.querySelectorAll(".opt").forEach(b=>b.onclick=()=>{
-      const i=+b.dataset.i;
-      if(i===p.a){ const pts=CHOICE_PTS[r.picked.length]; setFb(r,"ok",`Aptly! +${pts} points`); return resolve(pts,"solved"); }
-      r.picked.push(i);
-      if(r.picked.length>=3){ setFb(r,"no","Not quite. Out of picks."); return resolve(0,"failed"); }
-      setFb(r,"no",`Not quite. ${3-r.picked.length} ${3-r.picked.length===1?"pick":"picks"} left.`); save(); renderRound(); shakeCard();
+      const cls=r.done?(i===p.a?"right":i===r.picked?"wrong":""):"";
+      return `<button class="opt ${cls}" data-i="${i}" ${r.done?"disabled":""}>${esc(o)}</button>`;}).join("")}</div>${r.done?"":oneGuess("One tap")}`;
+    if(!r.done) document.querySelectorAll(".opt").forEach(b=>b.onclick=()=>{
+      if(timeUp()) return;
+      const i=+b.dataset.i; r.picked=i;
+      finish(i===p.a?speedScore(elapsed()):0, i===p.a?"right":"wrong");
     });
   },
   graded(p,r){
     $("#card").innerHTML=`<p class="q">${esc(p.q)}</p><div class="opts long">${p.o.map((o,i)=>{
-      const cls=r.done?(o.p===100?"right":(r.picked[0]===i?"chosen":"")):"";
-      return `<button class="opt ${cls}" data-i="${i}" ${r.done?"disabled":""}>${esc(o.x)}${r.done?`<span class="pts">${o.p} points</span>`:""}</button>`;}).join("")}</div>${r.done?"":`<p class="tries"><span>One choice only</span><span>Up to 100 points</span></p>`}`;
-    document.querySelectorAll(".opt").forEach(b=>b.onclick=()=>{
-      const o=p.o[+b.dataset.i]; r.picked=[+b.dataset.i];
-      if(o.p===100){ setFb(r,"ok","Aptly! The best possible move. +100 points"); return resolve(100,"solved"); }
-      if(o.p>=40){ setFb(r,"near",`Almost Aptly! A decent move. +${o.p} points`); return resolve(o.p,"partial"); }
-      setFb(r,"no",`Not quite. +${o.p} points`); resolve(o.p,"partial");
+      const cls=r.done?(o.p===100?"right":(r.picked===i?"chosen":"")):"";
+      return `<button class="opt ${cls}" data-i="${i}" ${r.done?"disabled":""}>${esc(o.x)}${r.done?`<span class="pts">${o.p===100?"Best move":r.picked===i?"Your pick":""}</span>`:""}</button>`;}).join("")}</div>${r.done?"":oneGuess("One choice")}`;
+    if(!r.done) document.querySelectorAll(".opt").forEach(b=>b.onclick=()=>{
+      if(timeUp()) return;
+      const i=+b.dataset.i, o=p.o[i]; r.picked=i; r.given=o.x;
+      if(o.p===100) return finish(speedScore(elapsed()),"right");
+      if(o.p>=40) return finish(15+30*o.p/100,"near","A decent move, but not the best one.");
+      if(o.p>0) return finish(10,"near","It helps a little.");
+      finish(0,"wrong");
     });
   },
   num(p,r){
-    const left=6-r.guesses.length;
-    $("#card").innerHTML=`<p class="q">${esc(p.q)}</p>${r.done?"":`<form class="ansrow" id="f"><label class="sr" for="ans">Your guess</label><input id="ans" inputmode="decimal" placeholder="Your guess${p.unit?" ("+esc(p.unit)+")":""}" autocomplete="off"><button class="btn">Guess</button></form>`}
-      ${r.guesses.length?`<ol class="guesses">${r.guesses.map(g=>`<li><span>${fmt(g.g)}</span><span class="heat ${g.h}">${g.t}</span></li>`).join("")}</ol>`:""}
-      ${r.done?"":`<p class="tries"><span>${left} ${left===1?"guess":"guesses"} left</span><span>Worth ${NUM_PTS[r.guesses.length]} points</span></p>`}`;
+    $("#card").innerHTML=`<p class="q">${esc(p.q)}</p>${r.done?"":`<form class="ansrow" id="f"><label class="sr" for="ans">Your guess</label><input id="ans" inputmode="decimal" placeholder="Your guess${p.unit?" ("+esc(p.unit)+")":""}" autocomplete="off"><button class="btn">Submit</button></form>`+oneGuess("One guess")}`;
     wireForm(v=>{
       const m=v.replace(/[,\s_]/g,"").match(/-?\d+(\.\d+)?/);
-      if(!m){ setFb(r,"near","Type a number."); return renderRound(); }
-      const g=parseFloat(m[0]), off=Math.abs(g-p.a);
-      if(off<=p.tol){ const pts=NUM_PTS[r.guesses.length]; r.guesses.push({g,h:"hit",t:"Spot on"}); setFb(r,"ok",`Aptly! +${pts} points`); return resolve(pts,"solved"); }
-      const dir=g<p.a?"Higher ↑":"Lower ↓";
-      const h=off<=p.hot?"hot":off<=p.warm?"warm":off<=p.warm*4?"cool":"cold";
-      r.guesses.push({g,h,t:`${dir} · ${cap(h)}`});
-      if(r.guesses.length>=6){ setFb(r,"no","Not quite. Out of guesses."); return resolve(0,"failed"); }
-      if(h==="hot") setFb(r,"near",`Almost Aptly! Very close. Go ${g<p.a?"higher":"lower"}.`);
-      else setFb(r,"no",`Not quite. Go ${g<p.a?"higher":"lower"}.`);
-      save(); renderRound(); if(h!=="hot") shakeCard();
+      if(!m) return hint("Type a number.");
+      const g=parseFloat(m[0]), off=Math.abs(g-p.a), e=elapsed();
+      r.given=fmt(g)+(p.unit?" "+p.unit:"");
+      if(off<=p.tol) return finish(speedScore(e),"right");
+      const dir=g<p.a?"low":"high";
+      if(off<=p.hot) return finish(nearScore(e),"near",`Very close: a touch ${dir}, off by ${fmt(off)}.`);
+      if(off<=p.warm) return finish(Math.round(nearScore(e)/2),"near",`In the right area, but ${dir} by ${fmt(off)}.`);
+      finish(0,"wrong",`Too ${dir}, off by ${fmt(off)}.`);
     });
   },
   rubric(p,r){
-    $("#card").innerHTML=`<p class="q">${esc(p.q)}</p>`+(r.done?"":formRow("Type your idea",true)+triesLine(r,4,TEXT_PTS));
-    wireForm(v=>{
-      const j=judgeRubric(v,p);
-      if(j.k==="ok"){ const pts=Math.round(j.p*TEXT_PTS[r.tries]/100); setFb(r,"ok",j.p===100?`Aptly! +${pts} points`:`Aptly! A solid answer. +${pts} points`); return resolve(pts,"solved"); }
-      if(j.k==="near"){ setFb(r,"near","Almost Aptly! "+j.m); save(); return renderRound(); }
-      r.tries++;
-      if(r.tries>=4){ setFb(r,"no","Not quite. Out of tries."); return resolve(0,"failed"); }
-      setFb(r,"no",`Not quite. Try another angle. ${4-r.tries} ${4-r.tries===1?"try":"tries"} left.`); save(); renderRound(); shakeCard();
-    });
+    $("#card").innerHTML=`<p class="q">${esc(p.q)}</p>`+(r.done?"":formRow("Type your idea",true)+oneGuess());
+    wireForm(v=>scoreJudge(judgeRubric(v,p),r,v));
   },
   say(p,r){
-    $("#card").innerHTML=`<p class="q">${p.q}</p>`+(r.done?"":formRow(`Say it in ${p.max} words or fewer`,true)+`<p class="tries"><span>Attempt ${r.tries+1} of 4 · <span class="wc" id="wc">0 / ${p.max} words</span></span><span>Worth ${TEXT_PTS[r.tries]} points</span></p>`);
+    $("#card").innerHTML=`<p class="q">${p.q}</p>`+(r.done?"":formRow(`Say it in ${p.max} words or fewer`,true)+`<p class="hint" id="hint"></p><p class="tries"><span>One guess · <span class="wc" id="wc">0 / ${p.max} words</span></span><span>Faster answers fit better</span></p>`);
     const ta=$("#ans"); if(ta) ta.oninput=()=>{const n=wordCount(ta.value), w=$("#wc"); w.textContent=`${n} / ${p.max} words`; w.classList.toggle("over",n>p.max);};
-    wireForm(v=>{
-      const j=judgeSay(v,p);
-      if(j.k==="ok"){ setFb(r,"ok",`Aptly! +${TEXT_PTS[r.tries]} points`); return resolve(TEXT_PTS[r.tries],"solved"); }
-      if(j.k==="near"){ setFb(r,"near","Almost Aptly! "+j.m); save(); renderRound(); const t=$("#ans"); t.value=v; t.oninput(); return; }
-      r.tries++;
-      if(r.tries>=4){ setFb(r,"no","Not quite. Out of tries."); return resolve(0,"failed"); }
-      setFb(r,"no",`Not quite. ${j.m} ${4-r.tries} ${4-r.tries===1?"try":"tries"} left.`); save(); renderRound(); const t=$("#ans"); t.value=v; t.oninput(); shakeCard();
-    });
+    wireForm(v=>scoreJudge(judgeSay(v,p),r,v));
   },
   ladder(p,r){
-    const g=p.r.indexOf(null), len=p.r[0].length;
+    const len=p.r[0].length;
     $("#card").innerHTML=`<div class="ladder">${p.r.map((w,i)=>(i?`<span class="ar" aria-hidden="true">↓</span>`:"")+(w?`<span class="rung">${w}</span>`:(r.done?`<span class="rung" style="background:var(--green)">${p.a[0].toUpperCase()}</span>`:`<form id="f" style="display:contents"><label class="sr" for="ans">Missing word</label><input id="ans" class="rung-in" maxlength="${len}" placeholder="${"?".repeat(len)}" autocomplete="off" autocapitalize="characters" autocorrect="off" spellcheck="false"></form>`))).join("")}</div>
-      ${r.done?"":`<button class="btn" id="chk" style="background:var(--ink);color:var(--cream)">Check</button>`+triesLine(r,4,TEXT_PTS)}`;
+      ${r.done?"":`<button class="btn" id="chk" style="background:var(--ink);color:var(--cream)">Submit</button>`+oneGuess()}`;
     wireForm(v=>{
       const j=judgeLadder(v,p);
-      if(j.k==="ok"){ setFb(r,"ok",`Aptly! +${TEXT_PTS[r.tries]} points`); return resolve(TEXT_PTS[r.tries],"solved"); }
-      if(j.k==="near"||j.k==="hint"){ setFb(r,j.k==="near"?"near":"no",(j.k==="near"?"Almost Aptly! ":"")+j.m); save(); return renderRound(); }
-      r.tries++;
-      if(r.tries>=4){ setFb(r,"no","Not quite. Out of tries."); return resolve(0,"failed"); }
-      setFb(r,"no",`Not quite. ${j.m} ${4-r.tries} ${4-r.tries===1?"try":"tries"} left.`); save(); renderRound(); shakeCard();
+      if(j.k==="hint") return hint(j.m);
+      scoreJudge(j,r,v.toUpperCase());
     });
     const c=$("#chk"); if(c) c.onclick=()=>$("#f").requestSubmit();
   },
   steps(p,r){
     const W=p.w||[33,33,34], n=p.s.length, cur=Math.min(r.step,n-1);
-    let flow="";
+    const cls=i=>i<r.stepRes.length?(r.stepRes[i]===1?"got":r.stepRes[i]?"half":"miss"):(i===cur&&!r.done?"on":"");
+    let flow;
     if(p.start){
-      const words=[p.start,...p.s.map((s,i)=>i<r.step?(r.stepGot&&r.stepGot[i]||s.a[0]).toUpperCase():"?")];
-      flow=`<div class="steps-flow">${words.map((w,i)=>`${i?`<span class="ar" aria-hidden="true">→</span>`:""}<span class="s ${i===0?"on":i<=r.stepPts.length?(r.stepPts[i-1]>0?"got":"miss"):""}">${esc(w)}</span>`).join("")}</div>`;
+      const words=[p.start,...p.s.map((s,i)=>i<r.stepRes.length||r.done?s.a[0].toUpperCase():"?")];
+      flow=`<div class="steps-flow">${words.map((w,i)=>`${i?`<span class="ar" aria-hidden="true">→</span>`:""}<span class="s ${i===0?"on":cls(i-1)}">${esc(w)}</span>`).join("")}</div>`;
     }else{
-      flow=`<div class="steps-flow">${p.s.map((s,i)=>`${i?`<span class="ar" aria-hidden="true">→</span>`:""}<span class="s ${i<r.stepPts.length?(r.stepPts[i]>0?"got":"miss"):i===cur?"on":""}">Rule ${i+1} · ${W[i]}</span>`).join("")}</div>`;
+      flow=`<div class="steps-flow">${p.s.map((s,i)=>`${i?`<span class="ar" aria-hidden="true">→</span>`:""}<span class="s ${cls(i)}">Rule ${i+1}</span>`).join("")}</div>`;
     }
-    const st=p.s[cur], mult=STEP_MULT[r.stepTries];
-    $("#card").innerHTML=flow+(r.done?"":`<p class="stage">Step ${cur+1} of ${n} · worth ${Math.round(W[cur]*mult)} points</p><p class="q">${esc(st.q)}</p>`+formRow("Type your answer")+`<p class="tries"><span>Attempt ${r.stepTries+1} of 3 for this step</span><span>${r.stepPts.reduce((a,b)=>a+b,0)} points so far</span></p>`);
+    const st=p.s[cur];
+    const lastRes=r.stepRes.length?r.stepRes[r.stepRes.length-1]:null;
+    const prevMsg=r.stepRes.length&&!r.done?`<p class="hint" style="color:${lastRes===1?"var(--green-deep)":"#a2440c"}">${lastRes===1?"Fits. Next one.":lastRes?"Close enough for half credit.":`Not that one. It was ${esc(p.s[r.stepRes.length-1].a[0].toUpperCase())}.`}</p>`:"";
+    $("#card").innerHTML=flow+(r.done?"":prevMsg+`<p class="stage">Step ${cur+1} of ${n} · worth ${W[cur]}%</p><p class="q">${esc(st.q)}</p>`+formRow("Type your answer")+oneGuess("One guess per step"));
     wireForm(v=>{
       const j=judgeText(v,st.a,st.n);
-      const advance=()=>{ r.step++; r.stepTries=0; if(r.step>=n){ const sum=r.stepPts.reduce((a,b)=>a+b,0); return resolve(sum,sum>0?"solved":"failed"); } save(); renderRound(); };
-      if(j.k==="ok"){
-        const pts=Math.round(W[cur]*mult); r.stepPts.push(pts);
-        r.stepGot=r.stepGot||[]; r.stepGot[cur]=st.a.find(a=>fuzzyOk(squash(v),squash(a)))||st.a[0];
-        setFb(r,"ok",`Yes! +${pts}. ${r.step+1<n?"Next link…":""}`); return advance();
-      }
-      if(j.k==="near"){ setFb(r,"near","Almost Aptly! "+j.m); save(); return renderRound(); }
-      r.stepTries++;
-      if(r.stepTries>=3){ r.stepPts.push(0); r.stepGot=r.stepGot||[]; r.stepGot[cur]=st.a[0]; setFb(r,"no",`Not quite. It was ${st.a[0].toUpperCase()}. On to the next.`); return advance(); }
-      setFb(r,"no",`Not quite. ${3-r.stepTries} ${3-r.stepTries===1?"try":"tries"} left on this step.`); save(); renderRound(); shakeCard();
+      r.stepRes.push(j.k==="ok"?1:j.k==="near"?.5:0); r.stepGiven.push(v.trim()); r.step++;
+      if(r.step<n){ save(); return renderRound(); }
+      const frac=r.stepRes.reduce((s,x,i)=>s+x*W[i],0)/100, e=elapsed();
+      const got=r.stepRes.filter(x=>x===1).length;
+      if(frac>=.999) return finish(speedScore(e),"right");
+      if(frac>0) return finish(frac*speedScore(e),"near",`${got} of ${n} fit perfectly.`);
+      finish(0,"wrong");
     });
   }
 };
 
-/* ---------------- APTLY! pop ---------------- */
+/* ---------------- APTLY! moment ---------------- */
 let popTimer;
 function pop(pts){
   const el=$("#pop");
-  $("#popin").innerHTML=Array.from({length:14},(_,i)=>`<i class="ray" style="--a:${i*360/14}deg"></i>`).join("")+
-    `<div class="pop-word">APTLY!</div><div class="pop-sub">${pts>=100?"A perfect fit.":"Nicely done."} <b>+${pts} points</b></div>`;
+  $("#popin").innerHTML=`<div class="snap" aria-hidden="true"><div class="snap-tape ticks"></div><div class="snap-stitch"></div></div><div class="pop-word">APTLY!</div><div class="pop-sub">A perfect fit. <b>+${pts} points</b></div>`;
   el.hidden=false; el.classList.remove("go"); void el.offsetWidth; el.classList.add("go");
-  clearTimeout(popTimer); popTimer=setTimeout(hidePop,1500);
+  clearTimeout(popTimer); popTimer=setTimeout(hidePop,1900);
 }
 function hidePop(){ $("#pop").hidden=true; }
 $("#pop").onclick=hidePop;
@@ -826,22 +943,25 @@ $("#pop").onclick=hidePop;
 /* ---------------- Results ---------------- */
 function msToMidnight(){ const n=new Date(), m=new Date(n.getFullYear(),n.getMonth(),n.getDate()+1); return m-n; }
 function hms(ms){ const s=Math.max(0,Math.floor(ms/1000)); return [Math.floor(s/3600),Math.floor(s%3600/60),s%60].map(x=>String(x).padStart(2,"0")).join(":"); }
+const SQ={aptly:"🟨",tailored:"🟩",suited:"🟦",fit:"🟧",compatible:"🟫",nofit:"⬛"};
 function shareText(){
   const t=total();
-  return `aptly. No. ${Math.max(1,S.day-LAUNCH+1)} · ${t}/700\n${S.r.map(r=>r.score>=100?"🟩":r.score>0?"🟨":"⬛").join("")}\n${rating(t)}`;
+  return `aptly. No. ${Math.max(1,S.day-LAUNCH+1)} · ${t}/700\n${S.r.map(r=>SQ[tierOf(r.score).k]).join("")}\n${rating(t)}`;
 }
 function renderResults(){
   const t=total(), st=streakNow();
+  const counts=Object.fromEntries(TIERS.map(x=>[x.k,0])); S.r.forEach(r=>counts[tierOf(r.score).k]++);
   $("#view").innerHTML=`
   <section class="results">
     <div class="final ${t>=550?"gold":""}">
-      <p class="eyebrow">Today's score · No. ${Math.max(1,S.day-LAUNCH+1)}</p>
+      <p class="eyebrow">Today's fitting · No. ${Math.max(1,S.day-LAUNCH+1)}</p>
       <div class="big">${t}<small> / 700</small></div>
       <h2 class="rating">${rating(t)}</h2>
       <p class="note">A just-for-fun title, not an IQ score.</p>
     </div>
-    <div class="stats"><div class="g"><b>${st.live}</b>Day streak</div><div><b>${st.best||st.live}</b>Best streak</div><div><b>${S.r.filter(r=>r.score>=100).length}/7</b>Perfect fits</div></div>
-    <ol class="breakdown">${S.picks.map((id,i)=>{const p=BY_ID[id], r=S.r[i];return `<li><span class="n">${i+1}</span><span class="what"><b>${CATS[p.c].n}</b><span>${p.t==="graded"?esc(p.o.find(o=>o.p===100).x):answerHTML(p)}</span></span><span class="badge ${markOf(r)}">${r.score}</span></li>`}).join("")}</ol>
+    <div class="tiercount">${TIERS.map(x=>`<div class="${counts[x.k]?"":"zero"}">${tagHTML(x,"sm")}<b>${counts[x.k]}</b></div>`).join("")}</div>
+    <div class="stats"><div class="g"><b>${st.live}</b>Day streak</div><div><b>${st.best||st.live}</b>Best streak</div><div><b>${counts.aptly}</b>APTLY! fits</div></div>
+    <ol class="breakdown">${S.picks.map((id,i)=>{const p=BY_ID[id], r=S.r[i], tr=tierOf(r.score);return `<li><span class="n">${i+1}</span><span class="what"><b>${CATS[p.c].n}</b><span>${answerHTML(p)}</span></span><span class="sc">${tagHTML(tr,"sm")}${r.score}</span></li>`}).join("")}</ol>
     <div class="share"><pre id="sharetext">${esc(shareText())}</pre><button class="btn cream wide" id="copy">Copy my result</button></div>
     <p class="next">Next seven puzzles in <b id="cd">${hms(msToMidnight())}</b></p>
   </section>`;
@@ -853,9 +973,11 @@ function renderResults(){
 }
 setInterval(()=>{
   const cd=$("#cd"); if(cd) cd.textContent=hms(msToMidnight());
-  if(S && dayInfo().key!==S.key) init();
+  if(S && dayInfo().key!==S.key) return init();
+  if(S && S.started && !allDone() && !S.r[S.cur].done && S.r[S.cur].t0 && elapsed()>=LIMIT) tick();
 },1000);
 document.addEventListener("keydown",e=>{ if(e.key==="Escape") hidePop(); });
+document.addEventListener("visibilitychange",()=>{ if(!document.hidden && S && S.started) tick(); });
 
 init();
 </script>
